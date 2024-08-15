@@ -1,11 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    kotlin("kapt")
+    id("io.realm.kotlin")
     id("kotlin-parcelize")
-    alias(libs.plugins.dagger.hilt)
-    alias(libs.plugins.realm.kotlin)
-    alias(libs.plugins.google.services)
+    id("com.google.dagger.hilt.android")
+    kotlin("kapt")
+//    alias(libs.plugins.google.services)
 }
 
 android {
@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.android.ark.daydreamer"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -45,7 +45,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
     packaging {
         resources {
@@ -53,6 +53,11 @@ android {
         }
     }
 }
+
+kapt {
+    correctErrorTypes = true
+}
+
 
 dependencies {
 
@@ -63,6 +68,7 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.material3)
 
     // Google Firebase Service
@@ -74,8 +80,8 @@ dependencies {
 
     // Dagger Hilt DI
     implementation(libs.google.dagger.hilt.android)
-    implementation(libs.androidx.ui.text.google.fonts)
     kapt(libs.google.dagger.hilt.compiler)
+    kapt(libs.androidx.hilt.compiler)
 
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.core.splash)
@@ -88,12 +94,18 @@ dependencies {
     kapt(libs.androidx.room.compiler)
 
     // Mongo DB - Realm
-    implementation(libs.jetbrains.kotlinx.coroutines.android)
+    implementation(libs.jetbrains.kotlinx.coroutines.core) {
+        version {
+            strictly("1.6.0-native-mt")
+        }
+    }
     implementation(libs.realm.kotlin.library.sync)
+//    implementation(libs.realm.kotlin.library.base)
 
     implementation(libs.coil.kotlin)
     implementation(libs.github.stevdza.messagebarcompose)
     implementation(libs.github.stevdza.onetapcompose)
+    implementation(libs.github.vanpra.compose.datetime)
 
     // Disabling Annotation API 26 Level or Higher
     coreLibraryDesugaring(libs.android.tools.desugar)

@@ -1,0 +1,120 @@
+package com.android.ark.daydreamer.navigation
+
+import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationScreen
+import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationViewmodel
+import com.android.ark.daydreamer.utils.Constants
+import com.stevdzasan.messagebar.rememberMessageBarState
+import com.stevdzasan.onetap.rememberOneTapSignInState
+import io.realm.kotlin.mongodb.App
+import kotlinx.coroutines.launch
+
+
+@Composable
+fun SetupNavigationGraph(
+    startDestination: String,
+    navController: NavHostController,
+) {
+    NavHost(
+        startDestination = startDestination,
+        navController = navController
+    ) {
+        authenticationRoute(
+            navigateToHome = {
+                navController.popBackStack()
+                navController.navigate(Screen.Home.route)
+            }
+        )
+        homeRoute()
+        writeRoute()
+    }
+}
+
+fun NavGraphBuilder.authenticationRoute(
+    navigateToHome: () -> Unit
+) {
+    composable(route = Screen.Authentication.route) {
+        val authenticationViewmodel: AuthenticationViewmodel = viewModel()
+        val isAuthenticated by authenticationViewmodel.authenticatedState
+        val loadingState by authenticationViewmodel.loadingState
+        val oneTapState = rememberOneTapSignInState()
+        val messageBarState = rememberMessageBarState()
+
+        AuthenticationScreen(
+            oneTapSignInState = oneTapState,
+            loadingState = loadingState,
+            onButtonClicked = {
+                oneTapState.open()
+                authenticationViewmodel.setLoading(true)
+            },
+            messageBarState = messageBarState,
+            onTokenIdReceived = { tokenId ->
+                authenticationViewmodel.signInToMongoAtlas(
+                    tokenId = tokenId,
+                    onSuccess = {
+                        messageBarState.addSuccess("Successfully Authenticated!")
+                        authenticationViewmodel.setLoading(false)
+                    },
+                    onError = { exception ->
+                        messageBarState.addError(exception)
+                        authenticationViewmodel.setLoading(false)
+                    }
+                )
+            },
+            onDialogDismissed = {
+                messageBarState.addError(Exception(it))
+            },
+            navigateToHome = { navigateToHome() },
+            isAuthenticated = isAuthenticated
+        )
+    }
+}
+
+fun NavGraphBuilder.homeRoute() {
+    composable(route = Screen.Home.route) {
+        val coroutineScope = rememberCoroutineScope()
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(onClick = {
+                coroutineScope.launch {
+                    App.create(Constants.APP_ID).currentUser?.logOut()
+                }
+            }) {
+                Text(text = "Logout")
+            }
+        }
+    }
+}
+
+fun NavGraphBuilder.writeRoute() {
+    composable(
+        route = Screen.Write.route,
+        arguments = listOf(navArgument(name = "diaryId") {
+            type = NavType.StringType
+            nullable = true
+            defaultValue = null
+        })
+    ) {
+
+    }
+}

@@ -1,11 +1,12 @@
 [versions]
-agp = "8.5.1"
-kotlin = "1.9.0"
+agp = "8.5.2"
+hiltCompiler = "1.2.0"
+kotlin = "1.9.10"
 coreKtx = "1.13.1"
 coreSplash = "1.0.1"
 junit = "4.13.2"
-junitVersion = "1.1.5"
-espressoCore = "3.5.1"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.4"
 lifecycleRuntimeCompose = "2.8.4"
 activityCompose = "1.9.1"
@@ -18,18 +19,18 @@ firebaseAuth = "23.0.0"
 firebaseStorage = "21.0.0"
 room = "2.6.1"
 kotlinxCoroutinesCore = "1.6.0-native-mt"
-kotlinxCoroutinesAndroid = "1.9.0-RC"
-realmLibrarySync = "1.0.2"
+realmLibrarySync = "1.16.0"
 hiltNavigationCompose = "1.2.0"
-googlePlayServicesAuth = "20.4.0"
-coilCompose = "2.2.2"
-accompanistPager = "0.27.0"
-desugarJdkLibs = "1.2.0"
+googlePlayServicesAuth = "21.2.0"
+coilCompose = "2.5.0"
+accompanistPager = "0.28.0"
+desugarJdkLibs = "2.0.4"
 uiTextGoogleFonts = "1.6.8"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splash = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplash"}
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltCompiler" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -51,19 +52,23 @@ androidx-room-compiler = { group = "androidx.room", name="room-compiler", versio
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 
 google-dagger-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt"}
+google-dagger-hilt-android-plugin = { group = "com.google.dagger", name = "hilt-android-plugin", version.ref = "hilt"}
 google-dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt"}
 google-firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth"}
 google-firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage"}
 google-android-play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "googlePlayServicesAuth"}
 google-accompanist-pager = { group = "com.google.accompanist", name = "accompanist-pager", version.ref = "accompanistPager"}
 
-jetbrains-kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid"}
+jetbrains-kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore"}
+#jetbrains-kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid"}
 realm-kotlin-library-sync = { group = "io.realm.kotlin", name = "library-sync", version.ref = "realmLibrarySync"}
+realm-kotlin-library-base = { group = "io.realm.kotlin", name = "library-base", version.ref = "realmLibrarySync"}
 
 coil-kotlin = { group = "io.coil-kt", name = "coil-compose", version.ref = "coilCompose"}
 
 github-stevdza-messagebarcompose = { group = "com.github.stevdza-san", name = "MessageBarCompose", version = "1.0.5"}
 github-stevdza-onetapcompose = { group = "com.github.stevdza-san", name = "OneTapCompose", version = "1.0.0"}
+github-vanpra-compose-datetime = { group = "io.github.vanpra.compose-material-dialogs", name = "datetime", version = "0.9.0"}
 
 android-tools-desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs"}
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
