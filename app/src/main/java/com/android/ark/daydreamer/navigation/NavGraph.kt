@@ -1,16 +1,13 @@
 package com.android.ark.daydreamer.navigation
 
-import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -18,13 +15,17 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.android.ark.daydreamer.presentation.components.DisplayAlertDialog
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationScreen
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationViewmodel
+import com.android.ark.daydreamer.presentation.screens.home.HomeScreen
 import com.android.ark.daydreamer.utils.Constants
 import com.stevdzasan.messagebar.rememberMessageBarState
 import com.stevdzasan.onetap.rememberOneTapSignInState
 import io.realm.kotlin.mongodb.App
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @Composable
@@ -42,7 +43,15 @@ fun SetupNavigationGraph(
                 navController.navigate(Screen.Home.route)
             }
         )
-        homeRoute()
+        homeRoute(
+            navigateToWrite = {
+                navController.navigate(Screen.Write.route)
+            },
+            navigateToAuth = {
+                navController.popBackStack()
+                navController.navigate(Screen.Authentication.route)
+            }
+        )
         writeRoute()
     }
 }
@@ -87,22 +96,43 @@ fun NavGraphBuilder.authenticationRoute(
     }
 }
 
-fun NavGraphBuilder.homeRoute() {
+fun NavGraphBuilder.homeRoute(
+    navigateToWrite: () -> Unit,
+    navigateToAuth: () -> Unit
+) {
     composable(route = Screen.Home.route) {
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val coroutineScope = rememberCoroutineScope()
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(onClick = {
+        var signOutDialogOpened by remember { mutableStateOf(false) }
+        HomeScreen(
+            onMenuClick = {
                 coroutineScope.launch {
-                    App.create(Constants.APP_ID).currentUser?.logOut()
+                    drawerState.open()
                 }
-            }) {
-                Text(text = "Logout")
+            },
+            navigateToWrite = navigateToWrite,
+            drawerState = drawerState,
+            onSignOutClicked = { signOutDialogOpened = true }
+        )
+
+        DisplayAlertDialog(
+            title = "Sign Out",
+            message = "Are you sure you want to sign out from your account?",
+            dialogOpened = signOutDialogOpened,
+            onDialogClosed = { signOutDialogOpened = false },
+            onYesClicked = {
+                coroutineScope.launch(Dispatchers.IO) {
+                    val user = App.create(Constants.APP_ID).currentUser
+                    if (user != null) {
+                        user.logOut()
+                        withContext(Dispatchers.Main) {
+                            drawerState.close()
+                            navigateToAuth()
+                        }
+                    }
+                }
             }
-        }
+        )
     }
 }
 
