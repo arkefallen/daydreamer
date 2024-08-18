@@ -1,5 +1,6 @@
 package com.android.ark.daydreamer.presentation.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,6 +37,7 @@ import com.android.ark.daydreamer.model.Diary
 import com.android.ark.daydreamer.model.Mood
 import com.android.ark.daydreamer.utils.Elevation
 import com.android.ark.daydreamer.utils.toInstant
+import io.realm.kotlin.ext.realmListOf
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Date
@@ -49,6 +51,7 @@ fun DiaryHolder(
     var componentHeight by remember { mutableStateOf(0.dp) }
     val localDensity = LocalDensity.current
     val mutableInteractionSource by  remember { mutableStateOf(MutableInteractionSource()) }
+    var galleryButtonOpened by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier.clickable(
             indication = null,
@@ -87,6 +90,22 @@ fun DiaryHolder(
                     maxLines = 4,
                     overflow = TextOverflow.Ellipsis
                 )
+                if (diary.images.isNotEmpty()) {
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.padding(horizontal = 14.dp).fillMaxWidth()
+                    ) {
+                        ShowGalleryButton(
+                            galleryOpened = galleryButtonOpened,
+                            onClick = { galleryButtonOpened = !galleryButtonOpened }
+                        )
+                    }
+                }
+                AnimatedVisibility(visible = galleryButtonOpened) {
+                    Column(modifier = Modifier.padding(horizontal = 14.dp)) {
+                        Gallery(images = diary.images)
+                    }
+                }
             }
         }
     }
@@ -135,7 +154,8 @@ fun DiaryHolderPreview() {
             title = "Title"
             description = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
             mood = Mood.Happy.name
+            images = realmListOf("","")
         },
-        onClick = {}
+        onClick = {},
     )
 }
