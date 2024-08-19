@@ -1,9 +1,12 @@
 package com.android.ark.daydreamer.presentation.components
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,7 +24,14 @@ import java.time.LocalDate
 fun DateHeader(
     date: LocalDate
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 14.dp)
+            .background(MaterialTheme.colorScheme.surface)
+        ,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Column(horizontalAlignment = Alignment.End) {
             Text(
                 text = String.format("%02d", date.dayOfMonth),
@@ -53,7 +63,7 @@ fun DateHeader(
                     fontSize = MaterialTheme.typography.bodySmall.fontSize,
                     fontWeight = FontWeight.Light
                 ),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
         }
     }

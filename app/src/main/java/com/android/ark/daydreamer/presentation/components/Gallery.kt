@@ -1,9 +1,11 @@
 package com.android.ark.daydreamer.presentation.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerBasedShape
@@ -18,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -35,7 +38,7 @@ fun Gallery(
     spaceBetween: Dp = 10.dp,
     imageShape: CornerBasedShape = Shapes().small,
 ) {
-    BoxWithConstraints(modifier = modifier) {
+    BoxWithConstraints(modifier = modifier.padding(vertical = 14.dp)) {
         // DerivedStateOf -> define calculation that value changes overtime without making Composable to recompose
         val numberOfVisibleImages = remember {
             derivedStateOf {
@@ -66,17 +69,18 @@ fun Gallery(
                         .data(image)
                         .crossfade(true)
                         .build(),
+                    contentScale = ContentScale.Crop,
                     contentDescription = "Gallery Image"
                 )
                 Spacer(modifier = Modifier.width(spaceBetween))
             }
-        }
-        if (remainingImages.value > 0) {
-            LastImageOverlay(
-                imageSize = imageSize,
-                remainingImages = remainingImages.value,
-                imageShape = imageShape
-            )
+            if (remainingImages.value > 0) {
+                LastImageOverlay(
+                    imageSize = imageSize,
+                    imageShape = imageShape,
+                    remainingImages = remainingImages.value
+                )
+            }
         }
     }
 }

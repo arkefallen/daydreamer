@@ -19,6 +19,7 @@ import com.android.ark.daydreamer.presentation.components.DisplayAlertDialog
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationScreen
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationViewmodel
 import com.android.ark.daydreamer.presentation.screens.home.HomeScreen
+import com.android.ark.daydreamer.presentation.screens.home.HomeViewmodel
 import com.android.ark.daydreamer.utils.Constants
 import com.stevdzasan.messagebar.rememberMessageBarState
 import com.stevdzasan.onetap.rememberOneTapSignInState
@@ -101,10 +102,13 @@ fun NavGraphBuilder.homeRoute(
     navigateToAuth: () -> Unit
 ) {
     composable(route = Screen.Home.route) {
+        val viewmodel: HomeViewmodel = viewModel()
+        val diaries by viewmodel.diaries
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val coroutineScope = rememberCoroutineScope()
         var signOutDialogOpened by remember { mutableStateOf(false) }
         HomeScreen(
+            diaries = diaries,
             onMenuClick = {
                 coroutineScope.launch {
                     drawerState.open()
