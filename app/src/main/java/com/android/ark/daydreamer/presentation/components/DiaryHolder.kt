@@ -1,6 +1,11 @@
 package com.android.ark.daydreamer.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,11 +19,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +59,7 @@ fun DiaryHolder(
     val localDensity = LocalDensity.current
     val mutableInteractionSource by  remember { mutableStateOf(MutableInteractionSource()) }
     var galleryButtonOpened by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier.clickable(
             indication = null,
@@ -71,6 +79,7 @@ fun DiaryHolder(
         Surface(
             modifier = Modifier
                 .clip(shape = Shapes().medium)
+                .animateContentSize()
                 .onGloballyPositioned {
                     componentHeight = with(localDensity) {
                         it.size.height.toDp()
@@ -93,17 +102,27 @@ fun DiaryHolder(
                 if (diary.images.isNotEmpty()) {
                     Row(
                         horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.padding(horizontal = 14.dp).fillMaxWidth()
+                        modifier = Modifier
+                            .padding(horizontal = 14.dp)
+                            .fillMaxWidth()
                     ) {
                         ShowGalleryButton(
                             galleryOpened = galleryButtonOpened,
                             onClick = { galleryButtonOpened = !galleryButtonOpened }
                         )
                     }
-                }
-                AnimatedVisibility(visible = galleryButtonOpened) {
-                    Column(modifier = Modifier.padding(horizontal = 14.dp)) {
-                        Gallery(images = diary.images)
+                    AnimatedVisibility(
+                        visible = galleryButtonOpened,
+                        enter = fadeIn() + expandVertically(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(horizontal = 14.dp)) {
+                            Gallery(images = diary.images)
+                        }
                     }
                 }
             }

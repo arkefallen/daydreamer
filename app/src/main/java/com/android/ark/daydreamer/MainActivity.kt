@@ -11,6 +11,8 @@ import androidx.navigation.compose.rememberNavController
 import com.android.ark.daydreamer.navigation.Screen
 import com.android.ark.daydreamer.navigation.SetupNavigationGraph
 import com.android.ark.daydreamer.ui.theme.DaydreamerAppTheme
+import com.android.ark.daydreamer.utils.Constants.APP_ID
+import io.realm.kotlin.mongodb.App
 
 @ExperimentalMaterial3Api
 class MainActivity : ComponentActivity() {
@@ -22,10 +24,16 @@ class MainActivity : ComponentActivity() {
             DaydreamerAppTheme {
                 val navController = rememberNavController()
                 SetupNavigationGraph(
-                    startDestination = Screen.Authentication.route,
+                    startDestination = getStartDestination(),
                     navController = navController
                 )
             }
         }
+    }
+
+    private fun getStartDestination(): String {
+        val user = App.create(APP_ID).currentUser
+        return if (user != null && user.loggedIn) Screen.Home.route
+        else Screen.Authentication.route
     }
 }

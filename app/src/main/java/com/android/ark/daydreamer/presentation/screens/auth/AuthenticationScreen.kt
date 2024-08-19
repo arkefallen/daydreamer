@@ -10,11 +10,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import com.android.ark.daydreamer.navigation.Screen
 import com.android.ark.daydreamer.utils.Constants
+import com.android.ark.daydreamer.utils.Constants.APP_ID
 import com.stevdzasan.messagebar.ContentWithMessageBar
 import com.stevdzasan.messagebar.MessageBarState
 import com.stevdzasan.onetap.OneTapSignInState
 import com.stevdzasan.onetap.OneTapSignInWithGoogle
+import io.realm.kotlin.mongodb.App
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable

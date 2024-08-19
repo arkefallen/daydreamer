@@ -51,7 +51,7 @@ fun HomeContent(
                 ) { diary ->
                     DiaryHolder(
                         diary = diary,
-                        onClick = onClick
+                        onClick = onClick,
                     )
                 }
             }
