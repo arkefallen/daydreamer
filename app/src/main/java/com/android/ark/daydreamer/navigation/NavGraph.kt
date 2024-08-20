@@ -1,3 +1,5 @@
+
+
 package com.android.ark.daydreamer.navigation
 
 import androidx.compose.material3.DrawerValue
@@ -15,12 +17,16 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.android.ark.daydreamer.model.Diary
 import com.android.ark.daydreamer.presentation.components.DisplayAlertDialog
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationScreen
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationViewmodel
 import com.android.ark.daydreamer.presentation.screens.home.HomeScreen
 import com.android.ark.daydreamer.presentation.screens.home.HomeViewmodel
+import com.android.ark.daydreamer.presentation.screens.write.WriteScreen
 import com.android.ark.daydreamer.utils.Constants
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.rememberPagerState
 import com.stevdzasan.messagebar.rememberMessageBarState
 import com.stevdzasan.onetap.rememberOneTapSignInState
 import io.realm.kotlin.mongodb.App
@@ -53,7 +59,9 @@ fun SetupNavigationGraph(
                 navController.navigate(Screen.Authentication.route)
             }
         )
-        writeRoute()
+        writeRoute(
+            onBackPressed = { navController.popBackStack() }
+        )
     }
 }
 
@@ -140,7 +148,8 @@ fun NavGraphBuilder.homeRoute(
     }
 }
 
-fun NavGraphBuilder.writeRoute() {
+@OptIn(ExperimentalPagerApi::class)
+fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
     composable(
         route = Screen.Write.route,
         arguments = listOf(navArgument(name = "diaryId") {
@@ -149,6 +158,15 @@ fun NavGraphBuilder.writeRoute() {
             defaultValue = null
         })
     ) {
+        val pagerState = rememberPagerState()
 
+        WriteScreen(
+            onBackPressed = onBackPressed,
+            onDeleteClick = {},
+            selectedDiary = Diary().apply {
+                title = "Example Diary"
+            },
+            pagerState = pagerState
+        )
     }
 }
