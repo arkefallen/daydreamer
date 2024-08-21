@@ -2,6 +2,7 @@
 
 package com.android.ark.daydreamer.navigation
 
+import android.widget.Toast
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -10,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -166,13 +168,36 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
         val writeViewmodel: WriteViewmodel = viewModel()
         val uiState = writeViewmodel.uiState
         val pagerState = rememberPagerState()
+        val context = LocalContext.current
+        var dialogOpened by remember { mutableStateOf(false) }
+        var errorMessage by remember { mutableStateOf("") }
 
         WriteScreen(
             onBackPressed = onBackPressed,
             onDeleteClick = {},
             pagerState = pagerState,
             writeViewmodel = writeViewmodel,
-            uiState = uiState
+            uiState = uiState,
+            onSaveClicked = {
+                writeViewmodel.insertDiary(
+                    diary = it,
+                    onSuccess = {
+                        onBackPressed()
+                        Toast.makeText(context, "Succesfully added diary!", Toast.LENGTH_SHORT).show()
+                    },
+                    onError = { error ->
+                        dialogOpened = true
+                        errorMessage = error
+                    }
+                )
+            }
+        )
+        DisplayAlertDialog(
+            title = "Error Add New Diary",
+            message = errorMessage,
+            dialogOpened = dialogOpened,
+            onDialogClosed = { },
+            onYesClicked = { dialogOpened = false }
         )
     }
 }

@@ -1,5 +1,6 @@
 package com.android.ark.daydreamer.presentation.screens.write
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -55,8 +56,10 @@ fun WriteContent(
     onTitleChanged: (String) -> Unit,
     description: String,
     onDescriptionChanged: (String) -> Unit,
-    selectedDiary: Diary?
+    selectedDiary: Diary?,
+    onSaveClicked: (Diary) -> Unit
 ) {
+    val context = LocalContext.current
     val currentDate by remember { mutableStateOf(LocalDate.now()) }
     val currentTime by remember { mutableStateOf(LocalTime.now()) }
     val formattedDate = remember(key1 = currentDate) {
@@ -203,11 +206,24 @@ fun WriteContent(
         ) {
             Spacer(modifier = Modifier.height(20.dp))
             Button(
-                onClick = {},
+                onClick = {
+                    if (title.isNotEmpty() && description.isNotEmpty()) {
+                        onSaveClicked(
+                            Diary().apply {
+                                this.title = title
+                                this.description = description
+                                this.mood = Mood.entries[pagerState.currentPage].name
+                            }
+                        )
+                    } else {
+                        Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                shape = MaterialTheme.shapes.small
+                shape = MaterialTheme.shapes.small,
+                enabled = !(title.isEmpty() &&  description.isEmpty())
             ) {
                 Text(text = "Save", fontWeight = FontWeight.Bold)
             }

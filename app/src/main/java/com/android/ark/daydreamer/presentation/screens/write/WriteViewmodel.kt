@@ -12,6 +12,7 @@ import com.android.ark.daydreamer.model.Mood
 import com.android.ark.daydreamer.utils.RequestState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
 
 class WriteViewmodel(
@@ -49,6 +50,32 @@ class WriteViewmodel(
                         }
                         else -> {}
                     }
+                }
+            }
+        }
+    }
+
+    fun insertDiary(
+        diary: Diary,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            MongoDB.insertDiary(diary = diary).collect { result ->
+                when (result) {
+                    is RequestState.Success -> {
+                        withContext(Dispatchers.Main) {
+                            onSuccess()
+                        }
+                    }
+
+                    is RequestState.Error -> {
+                        withContext(Dispatchers.Main) {
+                            onError(result.message)
+                        }
+                    }
+
+                    else -> {}
                 }
             }
         }

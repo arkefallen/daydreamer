@@ -10,8 +10,10 @@ import io.realm.kotlin.log.LogLevel
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
 import io.realm.kotlin.query.Sort
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import org.mongodb.kbson.BsonObjectId
 import java.time.ZoneId
@@ -40,8 +42,8 @@ object MongoDB : MongoRepository {
         }
     }
 
-    override fun getAllDiaries(): Flow<Diaries> {
-        return if (user != null) {
+    override fun getAllDiaries(): Flow<Diaries> = flow {
+        if (user != null) {
             try {
                 // Take all diaries from the realm database then sort based on date in descending order.
                 // The diaries is grouped by its date.
@@ -66,7 +68,7 @@ object MongoDB : MongoRepository {
                 emit(RequestState.Error(UserNotAuthenticatedMongoDBException().toString()))
             }
         }
-    }
+    }.flowOn(Dispatchers.IO)
 
     override fun getSelectedDiary(diaryId: BsonObjectId): Flow<RequestState<Diary>> = flow {
         if (user != null) {
@@ -79,6 +81,28 @@ object MongoDB : MongoRepository {
             }
         } else {
             emit(RequestState.Error(UserNotAuthenticatedMongoDBException().toString()))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    override suspend fun insertDiary(diary: Diary): Flow<RequestState<Diary>> {
+        return if (user != null) {
+            try {
+                realm.write {
+                    copyToRealm(diary.apply { ownerId = user.id })
+                }
+                flow {
+                    emit(RequestState.Success(data = diary))
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                flow {
+                    emit(RequestState.Error(e.message.toString()))
+                }
+            }
+        } else {
+            flow {
+                emit(RequestState.Error(UserNotAuthenticatedMongoDBException().toString()))
+            }
         }
     }
 }

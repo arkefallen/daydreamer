@@ -20,7 +20,8 @@ fun WriteScreen(
     onDeleteClick: () -> Unit,
     pagerState: PagerState,
     uiState: WriteUiState,
-    writeViewmodel: WriteViewmodel
+    writeViewmodel: WriteViewmodel,
+    onSaveClicked: (Diary) -> Unit
 ) {
     LaunchedEffect(key1 = uiState.mood) {
         pagerState.scrollToPage(Mood.valueOf(uiState.mood.name).ordinal)
@@ -46,7 +47,8 @@ fun WriteScreen(
             onDescriptionChanged = { desc ->
                 writeViewmodel.setDescription(description = desc)
             },
-            selectedDiary = uiState.selectedDiary
+            selectedDiary = uiState.selectedDiary,
+            onSaveClicked = onSaveClicked
         )
     }
 }
@@ -60,6 +62,9 @@ fun WriteScreenPreview() {
         onDeleteClick = {},
         pagerState = rememberPagerState(),
         uiState = WriteUiState(selectedDiary = Diary(), mood = Mood.Happy),
-        writeViewmodel = viewModel()
+        writeViewmodel = viewModel(),
+        onSaveClicked = {
+
+        }
     )
 }
