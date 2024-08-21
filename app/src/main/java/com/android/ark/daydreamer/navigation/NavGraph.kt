@@ -17,13 +17,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.android.ark.daydreamer.model.Diary
 import com.android.ark.daydreamer.presentation.components.DisplayAlertDialog
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationScreen
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationViewmodel
 import com.android.ark.daydreamer.presentation.screens.home.HomeScreen
 import com.android.ark.daydreamer.presentation.screens.home.HomeViewmodel
 import com.android.ark.daydreamer.presentation.screens.write.WriteScreen
+import com.android.ark.daydreamer.presentation.screens.write.WriteViewmodel
 import com.android.ark.daydreamer.utils.Constants
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
@@ -57,6 +57,9 @@ fun SetupNavigationGraph(
             navigateToAuth = {
                 navController.popBackStack()
                 navController.navigate(Screen.Authentication.route)
+            },
+            navigateToWriteWithArgs = { diaryId ->
+                navController.navigate(Screen.Write.createRoute(diaryId = diaryId))
             }
         )
         writeRoute(
@@ -107,6 +110,7 @@ fun NavGraphBuilder.authenticationRoute(
 
 fun NavGraphBuilder.homeRoute(
     navigateToWrite: () -> Unit,
+    navigateToWriteWithArgs: (String) -> Unit,
     navigateToAuth: () -> Unit
 ) {
     composable(route = Screen.Home.route) {
@@ -124,7 +128,8 @@ fun NavGraphBuilder.homeRoute(
             },
             navigateToWrite = navigateToWrite,
             drawerState = drawerState,
-            onSignOutClicked = { signOutDialogOpened = true }
+            onSignOutClicked = { signOutDialogOpened = true },
+            navigateToWriteWithArgs = navigateToWriteWithArgs
         )
 
         DisplayAlertDialog(
@@ -158,15 +163,16 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
             defaultValue = null
         })
     ) {
+        val writeViewmodel: WriteViewmodel = viewModel()
+        val uiState = writeViewmodel.uiState
         val pagerState = rememberPagerState()
 
         WriteScreen(
             onBackPressed = onBackPressed,
             onDeleteClick = {},
-            selectedDiary = Diary().apply {
-                title = "Example Diary"
-            },
-            pagerState = pagerState
+            pagerState = pagerState,
+            writeViewmodel = writeViewmodel,
+            uiState = uiState
         )
     }
 }

@@ -49,7 +49,8 @@ fun HomeScreen(
     drawerState: DrawerState,
     onSignOutClicked: () -> Unit,
     onMenuClick: () -> Unit,
-    navigateToWrite: () -> Unit
+    navigateToWrite: () -> Unit,
+    navigateToWriteWithArgs: (String) -> Unit
 ) {
     val padding by remember { mutableStateOf(PaddingValues()) }
     // Define ScrollBehavior for nesting DateHeader at the top of the screen during scroll down
@@ -73,7 +74,7 @@ fun HomeScreen(
                 is RequestState.Success -> {
                     HomeContent(
                         diaryNotes = diaries.data,
-                        onClick = {  },
+                        onClick = navigateToWriteWithArgs,
                         paddingValues = it
                     )
                 }

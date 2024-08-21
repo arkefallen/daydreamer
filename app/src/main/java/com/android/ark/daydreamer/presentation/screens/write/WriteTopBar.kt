@@ -1,12 +1,10 @@
 package com.android.ark.daydreamer.presentation.screens.write
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -14,6 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import com.android.ark.daydreamer.model.Diary
 import com.android.ark.daydreamer.presentation.components.DisplayAlertDialog
 
@@ -33,28 +31,16 @@ fun WriteTopBar(
     selectedDiary: Diary?,
     onDeleteClick: () -> Unit,
 ) {
-    CenterAlignedTopAppBar(
+    TopAppBar(
         title = {
-            Column {
-                Text(
-                    text = "Happy",
-                    modifier = Modifier.fillMaxWidth(),
-                    style = TextStyle(
-                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    textAlign = TextAlign.Center
+            Text(
+                text = if (selectedDiary != null) "Diary Detail" else "New Diary",
+                modifier = Modifier.fillMaxWidth(),
+                style = TextStyle(
+                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                    fontWeight = FontWeight.Bold
                 )
-                Text(
-                    text = "10 JAN 2023, 10:00 AM",
-                    modifier = Modifier.fillMaxWidth(),
-                    style = TextStyle(
-                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                        fontWeight = FontWeight.Normal
-                    ),
-                    textAlign = TextAlign.Center
-                )
-            }
+            )
         },
         navigationIcon = {
             IconButton(onClick = onBackPressed) {

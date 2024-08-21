@@ -14,28 +14,39 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.android.ark.daydreamer.model.Diary
 import com.android.ark.daydreamer.model.Mood
+import com.android.ark.daydreamer.utils.toInstant
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun WriteContent(
     paddingValues: PaddingValues,
@@ -43,13 +54,37 @@ fun WriteContent(
     title: String,
     onTitleChanged: (String) -> Unit,
     description: String,
-    onDescriptionChanged: (String) -> Unit
+    onDescriptionChanged: (String) -> Unit,
+    selectedDiary: Diary?
 ) {
+    val currentDate by remember { mutableStateOf(LocalDate.now()) }
+    val currentTime by remember { mutableStateOf(LocalTime.now()) }
+    val formattedDate = remember(key1 = currentDate) {
+        DateTimeFormatter
+            .ofPattern("dd MMMM yyyy")
+            .format(currentDate)
+    }
+    val formattedTime = remember(key1 = currentTime) {
+        DateTimeFormatter
+            .ofPattern("hh:mm: a")
+            .format(currentTime)
+    }
+
+    val selectedDiaryDateTime = remember(selectedDiary) {
+        if (selectedDiary != null) {
+            SimpleDateFormat("dd MMMM yyyy, hh:mm a", Locale.getDefault())
+                .format(Date.from(selectedDiary.date.toInstant()))
+        } else {
+            "Unknown"
+        }
+    }
+
     val scrollState = rememberScrollState()
     val pagerIndex = pagerState.currentPage
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(top = paddingValues.calculateTopPadding())
             .padding(bottom = paddingValues.calculateBottomPadding())
     ) {
@@ -77,7 +112,7 @@ fun WriteContent(
                 .padding(horizontal = 24.dp)
         ) {
             Text(
-                text = "How are you feeling today?",
+                text = "How is your feeling?",
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Center,
             )
@@ -92,12 +127,19 @@ fun WriteContent(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(scrollState)
                 .padding(bottom = 24.dp)
                 .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(30.dp))
-            TextField(
+            Text(
+                text = if (selectedDiary != null) selectedDiaryDateTime else "$formattedDate, $formattedTime",
+                style = TextStyle(
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
                 value = title,
                 onValueChange = onTitleChanged,
                 modifier = Modifier
@@ -125,8 +167,8 @@ fun WriteContent(
                 maxLines = 1,
                 singleLine = true
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
                 value = description,
                 onValueChange = onDescriptionChanged,
                 modifier = Modifier
@@ -167,7 +209,7 @@ fun WriteContent(
                     .height(50.dp),
                 shape = MaterialTheme.shapes.small
             ) {
-                Text(text = "Save")
+                Text(text = "Save", fontWeight = FontWeight.Bold)
             }
         }
     }
