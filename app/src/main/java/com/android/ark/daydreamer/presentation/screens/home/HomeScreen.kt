@@ -92,7 +92,12 @@ fun HomeScreen(
                         CircularProgressIndicator()
                     }
                 }
-                else -> {}
+                else -> {
+                    EmptyPage(
+                        title = "No Data",
+                        subtitle = "No diaries exist"
+                    )
+                }
             }
         }
     }

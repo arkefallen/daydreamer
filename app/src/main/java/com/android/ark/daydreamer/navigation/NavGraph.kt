@@ -179,11 +179,15 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
             writeViewmodel = writeViewmodel,
             uiState = uiState,
             onSaveClicked = {
-                writeViewmodel.insertDiary(
+                writeViewmodel.upsertDiary(
                     diary = it,
                     onSuccess = {
                         onBackPressed()
-                        Toast.makeText(context, "Succesfully added diary!", Toast.LENGTH_SHORT).show()
+                        if (uiState.selectedDiaryId != null) {
+                            Toast.makeText(context, "Succesfully updated diary!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "Succesfully added diary!", Toast.LENGTH_SHORT).show()
+                        }
                     },
                     onError = { error ->
                         dialogOpened = true
@@ -193,7 +197,7 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
             }
         )
         DisplayAlertDialog(
-            title = "Error Add New Diary",
+            title = "Error",
             message = errorMessage,
             dialogOpened = dialogOpened,
             onDialogClosed = { },

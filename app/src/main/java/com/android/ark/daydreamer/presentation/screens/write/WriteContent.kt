@@ -225,7 +225,11 @@ fun WriteContent(
                 shape = MaterialTheme.shapes.small,
                 enabled = !(title.isEmpty() &&  description.isEmpty())
             ) {
-                Text(text = "Save", fontWeight = FontWeight.Bold)
+                if (selectedDiary != null) {
+                    Text(text = "Update", fontWeight = FontWeight.Bold)
+                } else {
+                    Text(text = "Save", fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

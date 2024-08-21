@@ -42,8 +42,11 @@ object MongoDB : MongoRepository {
         }
     }
 
-    override fun getAllDiaries(): Flow<Diaries> = flow {
-        if (user != null) {
+    override fun getAllDiaries(): Flow<Diaries> {
+        flow {
+            emit(RequestState.Loading)
+        }
+        return if (user != null) {
             try {
                 // Take all diaries from the realm database then sort based on date in descending order.
                 // The diaries is grouped by its date.
@@ -65,10 +68,11 @@ object MongoDB : MongoRepository {
             }
         } else {
             flow {
+                emit(RequestState.Loading)
                 emit(RequestState.Error(UserNotAuthenticatedMongoDBException().toString()))
             }
         }
-    }.flowOn(Dispatchers.IO)
+    }
 
     override fun getSelectedDiary(diaryId: BsonObjectId): Flow<RequestState<Diary>> = flow {
         if (user != null) {
@@ -95,6 +99,40 @@ object MongoDB : MongoRepository {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                flow {
+                    emit(RequestState.Error(e.message.toString()))
+                }
+            }
+        } else {
+            flow {
+                emit(RequestState.Error(UserNotAuthenticatedMongoDBException().toString()))
+            }
+        }
+    }
+
+    override suspend fun updateDiary(updatedDiary: Diary): Flow<RequestState<Diary>> {
+        return if (user != null) {
+            try {
+                realm.write {
+                    val queriedDiary = query<Diary>(query = "_id == $0", updatedDiary._id)
+                        .find()
+                        .first()
+                    if (queriedDiary != null) {
+                        queriedDiary.title = updatedDiary.title
+                        queriedDiary.description = updatedDiary.description
+                        queriedDiary.mood = updatedDiary.mood
+                        queriedDiary.images = updatedDiary.images
+                        queriedDiary.date = updatedDiary.date
+                        flow {
+                            emit(RequestState.Success(data = updatedDiary))
+                        }
+                    } else {
+                        flow {
+                            emit(RequestState.Error(message = "Queried diary does not exist."))
+                        }
+                    }
+                }
+            } catch (e: Exception) {
                 flow {
                     emit(RequestState.Error(e.message.toString()))
                 }

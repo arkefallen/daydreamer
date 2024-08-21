@@ -1,6 +1,5 @@
 package com.android.ark.daydreamer.presentation.screens.home
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -21,7 +20,6 @@ class HomeViewmodel : ViewModel() {
         viewModelScope.launch {
             MongoDB.getAllDiaries().collect { result ->
                 diaries.value = result
-                Log.d("diaries from realm", "${diaries.value}")
             }
         }
     }

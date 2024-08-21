@@ -55,7 +55,7 @@ class WriteViewmodel(
         }
     }
 
-    fun insertDiary(
+    private fun insertDiary(
         diary: Diary,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
@@ -77,6 +77,53 @@ class WriteViewmodel(
 
                     else -> {}
                 }
+            }
+        }
+    }
+
+    private fun updateDiary(
+        updatedDiary: Diary,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            MongoDB.updateDiary(
+                updatedDiary = updatedDiary.apply {
+                    this._id = ObjectId.invoke(uiState.selectedDiaryId!!)
+                    this.date = uiState.selectedDiary!!.date
+                }
+            ).collect { result ->
+                when(result) {
+                    is RequestState.Success -> {
+                        withContext(Dispatchers.Main) {
+                            onSuccess()
+                        }
+                    }
+                    is RequestState.Error -> {
+                        withContext(Dispatchers.Main) {
+                            onError(result.message)
+                        }
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    fun upsertDiary(
+        diary: Diary,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (uiState.selectedDiaryId != null) {
+                updateDiary(
+                    updatedDiary = diary,
+                    onSuccess = onSuccess,
+                    onError = onError
+                )
+            } else {
+                insertDiary(diary, onSuccess, onError)
             }
         }
     }
