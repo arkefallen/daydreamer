@@ -1,5 +1,6 @@
 package com.android.ark.daydreamer.presentation.screens.write
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,6 +14,7 @@ import com.android.ark.daydreamer.utils.RequestState
 import com.android.ark.daydreamer.utils.toRealmInstant
 import io.realm.kotlin.types.RealmInstant
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
@@ -39,7 +41,11 @@ class WriteViewmodel(
     private fun fetchSelectedDiary() {
         if (uiState.selectedDiaryId != null) {
             viewModelScope.launch(Dispatchers.Main) {
-                MongoDB.getSelectedDiary(diaryId = ObjectId.invoke(uiState.selectedDiaryId!!)).collect { result ->
+                MongoDB.getSelectedDiary(diaryId = ObjectId.invoke(uiState.selectedDiaryId!!))
+                    .catch {
+                        emit(RequestState.Error(message = it.message.toString()))
+                    }
+                    .collect { result ->
                     when(result) {
                         is RequestState.Success -> {
                             result.data.let {
@@ -50,6 +56,9 @@ class WriteViewmodel(
                                     selectedDiary = it
                                 )
                             }
+                        }
+                        is RequestState.Error -> {
+                            Log.d("WriteViewmodel", result.message)
                         }
                         else -> {}
                     }
