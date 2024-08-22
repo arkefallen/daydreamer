@@ -5,7 +5,6 @@ import com.android.ark.daydreamer.utils.Constants
 import com.android.ark.daydreamer.utils.RequestState
 import com.android.ark.daydreamer.utils.toInstant
 import io.realm.kotlin.Realm
-import io.realm.kotlin.delete
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.log.LogLevel
 import io.realm.kotlin.mongodb.App
@@ -46,9 +45,6 @@ object MongoDB : MongoRepository {
 
     override fun getAllDiaries(): Flow<Diaries> {
         return if (user != null) {
-            flow {
-                emit(RequestState.Loading)
-            }
             try {
                 // Take all diaries from the realm database then sort based on date in descending order.
                 // The diaries is grouped by its date.
@@ -70,7 +66,6 @@ object MongoDB : MongoRepository {
             }
         } else {
             flow {
-                emit(RequestState.Loading)
                 emit(RequestState.Error(UserNotAuthenticatedMongoDBException().toString()))
             }
         }
@@ -135,6 +130,7 @@ object MongoDB : MongoRepository {
                     }
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
                 flow {
                     emit(RequestState.Error(e.message.toString()))
                 }
@@ -146,25 +142,32 @@ object MongoDB : MongoRepository {
         }
     }
 
-    override suspend fun deleteDiary(id: ObjectId): Flow<RequestState<Diary>> {
+    override suspend fun deleteDiary(id: ObjectId): Flow<RequestState<Boolean>> {
         return if (user != null) {
             try {
                 realm.write {
-                    try {
-                        val removedDiary = query<Diary>(query = "_id == $0 AND ownerId == $1", id, user.id)
-                            .find()
-                            .first()
-                        delete(removedDiary)
-                        flow {
-                            emit(RequestState.Success(data = removedDiary))
+                    val removedDiary = query<Diary>(query = "_id == $0 AND ownerId == $1", id, user.id)
+                        .first()
+                        .find()
+                    if (removedDiary != null) {
+                        try {
+                            this.delete(removedDiary)
+                            flow {
+                                emit(RequestState.Success(data = true))
+                            }
+                        } catch (err: Exception) {
+                            flow {
+                                emit(RequestState.Error(err.message.toString()))
+                            }
                         }
-                    } catch (err: Exception) {
+                    } else {
                         flow {
-                            emit(RequestState.Error(err.message.toString()))
+                            emit(RequestState.Error(message = "Queried diary does not exist."))
                         }
                     }
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
                 flow {
                     emit(RequestState.Error(e.message.toString()))
                 }

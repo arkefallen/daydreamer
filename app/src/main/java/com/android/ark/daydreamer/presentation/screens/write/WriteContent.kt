@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -143,14 +144,16 @@ fun WriteContent(
             state = pagerState,
             contentPadding = PaddingValues(horizontal = 24.dp),
         ) { itemIndex ->
-            AsyncImage(
-                modifier = Modifier.size(120.dp),
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(Mood.entries[itemIndex].icon)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "Mood Entries"
-            )
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                AsyncImage(
+                    modifier = Modifier.size(120.dp),
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(Mood.entries[itemIndex].icon)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Mood Entries"
+                )
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
         Column(
