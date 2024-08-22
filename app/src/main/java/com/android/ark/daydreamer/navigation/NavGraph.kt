@@ -3,6 +3,8 @@
 package com.android.ark.daydreamer.navigation
 
 import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -19,6 +21,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.android.ark.daydreamer.model.Mood
 import com.android.ark.daydreamer.presentation.components.DisplayAlertDialog
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationScreen
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationViewmodel
@@ -27,8 +30,6 @@ import com.android.ark.daydreamer.presentation.screens.home.HomeViewmodel
 import com.android.ark.daydreamer.presentation.screens.write.WriteScreen
 import com.android.ark.daydreamer.presentation.screens.write.WriteViewmodel
 import com.android.ark.daydreamer.utils.Constants
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.rememberPagerState
 import com.stevdzasan.messagebar.rememberMessageBarState
 import com.stevdzasan.onetap.rememberOneTapSignInState
 import io.realm.kotlin.mongodb.App
@@ -155,7 +156,7 @@ fun NavGraphBuilder.homeRoute(
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
     composable(
         route = Screen.Write.route,
@@ -167,14 +168,26 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
     ) {
         val writeViewmodel: WriteViewmodel = viewModel()
         val uiState = writeViewmodel.uiState
-        val pagerState = rememberPagerState()
+        val pagerState = rememberPagerState(pageCount = { Mood.entries.size })
         val context = LocalContext.current
         var dialogOpened by remember { mutableStateOf(false) }
         var errorMessage by remember { mutableStateOf("") }
 
         WriteScreen(
             onBackPressed = onBackPressed,
-            onDeleteClick = {},
+            onDeleteClick = {
+                writeViewmodel.deleteDiary(
+                    onSuccess = {
+                        onBackPressed()
+                        Toast.makeText(context, "Succesfully removed a diary!", Toast.LENGTH_SHORT)
+                            .show()
+                    },
+                    onError = { error ->
+                        dialogOpened = true
+                        errorMessage = error
+                    }
+                )
+            },
             pagerState = pagerState,
             writeViewmodel = writeViewmodel,
             uiState = uiState,

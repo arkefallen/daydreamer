@@ -4,7 +4,7 @@ plugins {
     id("io.realm.kotlin")
     id("kotlin-parcelize")
     id("com.google.dagger.hilt.android")
-    kotlin("kapt")
+    id("com.google.devtools.ksp")
 //    alias(libs.plugins.google.services)
 }
 
@@ -55,10 +55,6 @@ android {
     }
 }
 
-kapt {
-    correctErrorTypes = true
-}
-
 
 dependencies {
 
@@ -77,12 +73,10 @@ dependencies {
     implementation(libs.google.firebase.storage)
     implementation(libs.google.android.play.services.auth)
 
-    implementation(libs.google.accompanist.pager)
-
     // Dagger Hilt DI
     implementation(libs.google.dagger.hilt.android)
-    kapt(libs.google.dagger.hilt.compiler)
-    kapt(libs.androidx.hilt.compiler)
+    ksp(libs.google.dagger.hilt.compiler)
+    ksp(libs.androidx.hilt.compiler)
 
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.core.splash)
@@ -92,7 +86,7 @@ dependencies {
     // Android Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
 
     // Mongo DB - Realm
     implementation(libs.jetbrains.kotlinx.coroutines.core) {
@@ -101,7 +95,6 @@ dependencies {
         }
     }
     implementation(libs.realm.kotlin.library.sync)
-//    implementation(libs.realm.kotlin.library.base)
 
     implementation(libs.coil.kotlin)
     implementation(libs.github.stevdza.messagebarcompose)

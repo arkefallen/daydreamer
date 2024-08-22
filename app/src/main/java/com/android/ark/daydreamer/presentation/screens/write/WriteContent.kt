@@ -1,6 +1,7 @@
 package com.android.ark.daydreamer.presentation.screens.write
 
 import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -43,11 +47,6 @@ import coil.request.ImageRequest
 import com.android.ark.daydreamer.model.Diary
 import com.android.ark.daydreamer.model.Mood
 import com.android.ark.daydreamer.utils.toInstant
-import com.android.ark.daydreamer.utils.toRealmInstant
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.rememberPagerState
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -65,7 +64,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun WriteContent(
     paddingValues: PaddingValues,
@@ -141,7 +140,6 @@ fun WriteContent(
     ) {
         Spacer(modifier = Modifier.height(30.dp))
         HorizontalPager(
-            count = Mood.entries.size,
             state = pagerState,
             contentPadding = PaddingValues(horizontal = 24.dp),
         ) { itemIndex ->
@@ -295,13 +293,13 @@ fun WriteContent(
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 @Preview(showBackground = true)
 fun WriteContentPreview() {
     WriteContent(
         paddingValues = PaddingValues(),
-        pagerState = rememberPagerState(),
+        pagerState = rememberPagerState(pageCount = {1}),
         title = "title",
         onTitleChanged = {
 

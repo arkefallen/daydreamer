@@ -5,6 +5,7 @@ import com.android.ark.daydreamer.utils.Constants
 import com.android.ark.daydreamer.utils.RequestState
 import com.android.ark.daydreamer.utils.toInstant
 import io.realm.kotlin.Realm
+import io.realm.kotlin.delete
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.log.LogLevel
 import io.realm.kotlin.mongodb.App
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import org.mongodb.kbson.BsonObjectId
+import org.mongodb.kbson.ObjectId
 import java.time.ZoneId
 
 object MongoDB : MongoRepository {
@@ -43,10 +45,10 @@ object MongoDB : MongoRepository {
     }
 
     override fun getAllDiaries(): Flow<Diaries> {
-        flow {
-            emit(RequestState.Loading)
-        }
         return if (user != null) {
+            flow {
+                emit(RequestState.Loading)
+            }
             try {
                 // Take all diaries from the realm database then sort based on date in descending order.
                 // The diaries is grouped by its date.
@@ -129,6 +131,36 @@ object MongoDB : MongoRepository {
                     } else {
                         flow {
                             emit(RequestState.Error(message = "Queried diary does not exist."))
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                flow {
+                    emit(RequestState.Error(e.message.toString()))
+                }
+            }
+        } else {
+            flow {
+                emit(RequestState.Error(UserNotAuthenticatedMongoDBException().toString()))
+            }
+        }
+    }
+
+    override suspend fun deleteDiary(id: ObjectId): Flow<RequestState<Diary>> {
+        return if (user != null) {
+            try {
+                realm.write {
+                    try {
+                        val removedDiary = query<Diary>(query = "_id == $0 AND ownerId == $1", id, user.id)
+                            .find()
+                            .first()
+                        delete(removedDiary)
+                        flow {
+                            emit(RequestState.Success(data = removedDiary))
+                        }
+                    } catch (err: Exception) {
+                        flow {
+                            emit(RequestState.Error(err.message.toString()))
                         }
                     }
                 }

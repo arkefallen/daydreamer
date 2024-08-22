@@ -1,6 +1,9 @@
 package com.android.ark.daydreamer.presentation.screens.write
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -8,12 +11,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.ark.daydreamer.model.Diary
 import com.android.ark.daydreamer.model.Mood
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.rememberPagerState
 import java.time.ZonedDateTime
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun WriteScreen(
@@ -56,14 +56,14 @@ fun WriteScreen(
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 @Preview(showBackground = true)
 fun WriteScreenPreview() {
     WriteScreen(
         onBackPressed = {},
         onDeleteClick = {},
-        pagerState = rememberPagerState(),
+        pagerState = rememberPagerState(pageCount = {1}),
         uiState = WriteUiState(selectedDiary = Diary(), mood = Mood.Happy),
         writeViewmodel = viewModel(),
         onSaveClicked = {
