@@ -10,10 +10,13 @@ import com.android.ark.daydreamer.data.repository.MongoDB
 import com.android.ark.daydreamer.model.Diary
 import com.android.ark.daydreamer.model.Mood
 import com.android.ark.daydreamer.utils.RequestState
+import com.android.ark.daydreamer.utils.toRealmInstant
+import io.realm.kotlin.types.RealmInstant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
+import java.time.ZonedDateTime
 
 class WriteViewmodel(
     private val savedStateHandle: SavedStateHandle
@@ -90,7 +93,11 @@ class WriteViewmodel(
             MongoDB.updateDiary(
                 updatedDiary = updatedDiary.apply {
                     this._id = ObjectId.invoke(uiState.selectedDiaryId!!)
-                    this.date = uiState.selectedDiary!!.date
+                    if (uiState.updatedDateTime != null) {
+                        this.date = uiState.updatedDateTime!!
+                    } else {
+                        this.date = uiState.selectedDiary?.date!!
+                    }
                 }
             ).collect { result ->
                 when(result) {
@@ -135,6 +142,10 @@ class WriteViewmodel(
     fun setDescription(description: String) {
         uiState = uiState.copy(description = description)
     }
+
+    fun updateDateTime(zonedDateTime: ZonedDateTime) {
+        uiState = uiState.copy(updatedDateTime = zonedDateTime.toInstant().toRealmInstant())
+    }
 }
 
 data class WriteUiState(
@@ -142,5 +153,6 @@ data class WriteUiState(
     val description: String = "",
     val mood: Mood = Mood.Neutral,
     val selectedDiaryId : String? = null,
-    val selectedDiary: Diary? = null
+    val selectedDiary: Diary? = null,
+    val updatedDateTime: RealmInstant? = null
 )

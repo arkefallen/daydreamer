@@ -107,6 +107,9 @@ dependencies {
     implementation(libs.github.stevdza.messagebarcompose)
     implementation(libs.github.stevdza.onetapcompose)
     implementation(libs.github.vanpra.compose.datetime)
+    implementation(libs.github.maxkeppeler.sheetscomposedialog.core)
+    implementation(libs.github.maxkeppeler.sheetscomposedialog.calendar)
+    implementation(libs.github.maxkeppeler.sheetscomposedialog.clock)
 
     // Disabling Annotation API 26 Level or Higher
     coreLibraryDesugaring(libs.android.tools.desugar)

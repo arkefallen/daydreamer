@@ -1,6 +1,7 @@
 package com.android.ark.daydreamer.presentation.screens.write
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,40 +15,57 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.ark.daydreamer.model.Diary
 import com.android.ark.daydreamer.model.Mood
 import com.android.ark.daydreamer.utils.toInstant
+import com.android.ark.daydreamer.utils.toRealmInstant
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.rememberPagerState
+import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
+import com.maxkeppeler.sheets.calendar.CalendarDialog
+import com.maxkeppeler.sheets.calendar.models.CalendarConfig
+import com.maxkeppeler.sheets.calendar.models.CalendarSelection
+import com.maxkeppeler.sheets.calendar.models.CalendarStyle
+import com.maxkeppeler.sheets.clock.ClockDialog
+import com.maxkeppeler.sheets.clock.models.ClockConfig
+import com.maxkeppeler.sheets.clock.models.ClockSelection
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun WriteContent(
     paddingValues: PaddingValues,
@@ -57,14 +75,19 @@ fun WriteContent(
     description: String,
     onDescriptionChanged: (String) -> Unit,
     selectedDiary: Diary?,
-    onSaveClicked: (Diary) -> Unit
+    onSaveClicked: (Diary) -> Unit,
+    onUpdatedDateTime: (ZonedDateTime) -> Unit
 ) {
     val context = LocalContext.current
-    val currentDate by remember { mutableStateOf(LocalDate.now()) }
-    val currentTime by remember { mutableStateOf(LocalTime.now()) }
+
+    val calendarState = rememberUseCaseState()
+    val clockState = rememberUseCaseState()
+
+    var currentDate by remember { mutableStateOf(LocalDate.now()) }
+    var currentTime by remember { mutableStateOf(LocalTime.now()) }
     val formattedDate = remember(key1 = currentDate) {
         DateTimeFormatter
-            .ofPattern("dd MMMM yyyy")
+            .ofPattern("d MMM yyyy")
             .format(currentDate)
     }
     val formattedTime = remember(key1 = currentTime) {
@@ -72,18 +95,43 @@ fun WriteContent(
             .ofPattern("hh:mm: a")
             .format(currentTime)
     }
-
     val selectedDiaryDateTime = remember(selectedDiary) {
         if (selectedDiary != null) {
-            SimpleDateFormat("dd MMMM yyyy, hh:mm a", Locale.getDefault())
+            SimpleDateFormat("d MMM yyyy, hh:mm a", Locale.getDefault())
                 .format(Date.from(selectedDiary.date.toInstant()))
         } else {
             "Unknown"
         }
     }
+    var updatedDateTime by remember { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
     val pagerIndex = pagerState.currentPage
+
+    CalendarDialog(
+        state = calendarState,
+        selection = CalendarSelection.Date { selectionDate ->
+            currentDate = selectionDate
+            clockState.show()
+        },
+        config = CalendarConfig(
+            monthSelection = true,
+            yearSelection = true,
+            style = CalendarStyle.MONTH,
+        )
+    )
+
+    ClockDialog(
+        state = clockState,
+        selection = ClockSelection.HoursMinutes { selectionHour, selectionMinute ->
+            currentTime = LocalTime.of(selectionHour, selectionMinute)
+            updatedDateTime = true
+        },
+        config = ClockConfig(
+            is24HourFormat = false
+        )
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -134,11 +182,40 @@ fun WriteContent(
                 .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(30.dp))
-            Text(
-                text = if (selectedDiary != null) selectedDiaryDateTime else "$formattedDate, $formattedTime",
-                style = TextStyle(
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            OutlinedTextField(
+                value = if (selectedDiary != null && !updatedDateTime) selectedDiaryDateTime
+                else "$formattedDate, $formattedTime",
+                onValueChange = {},
+                modifier = Modifier
+                    .clickable(
+                        onClick = { calendarState.show() },
+                        enabled = true
+                    )
+                    .fillMaxWidth(),
+                suffix = {
+                    if (updatedDateTime) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close, contentDescription = "Date Close Button",
+                            modifier = Modifier.clickable(
+                                onClick = {
+                                    updatedDateTime = false
+                                    currentDate = LocalDate.now()
+                                    currentTime = LocalTime.now()
+                                }
+                            )
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Rounded.DateRange, contentDescription = "Date Button",
+                            modifier = Modifier.clickable(onClick = { calendarState.show() })
+                        )
+                    }
+                },
+                enabled = false,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    disabledSuffixColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -150,15 +227,6 @@ fun WriteContent(
                 placeholder = {
                     Text(text = "Your diary title")
                 },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    errorPlaceholderColor = Color.Transparent,
-                    disabledPlaceholderColor = Color.Transparent,
-                    focusedPlaceholderColor = Color.Transparent,
-                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                ),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 ),
@@ -179,15 +247,6 @@ fun WriteContent(
                 placeholder = {
                     Text(text = "Tell me about your day")
                 },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    errorPlaceholderColor = Color.Transparent,
-                    disabledPlaceholderColor = Color.Transparent,
-                    focusedPlaceholderColor = Color.Transparent,
-                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                ),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 ),
@@ -208,6 +267,7 @@ fun WriteContent(
             Button(
                 onClick = {
                     if (title.isNotEmpty() && description.isNotEmpty()) {
+                        onUpdatedDateTime(ZonedDateTime.of(currentDate, currentTime, ZoneId.systemDefault()))
                         onSaveClicked(
                             Diary().apply {
                                 this.title = title
@@ -223,7 +283,7 @@ fun WriteContent(
                     .fillMaxWidth()
                     .height(50.dp),
                 shape = MaterialTheme.shapes.small,
-                enabled = !(title.isEmpty() &&  description.isEmpty())
+                enabled = if (title.isEmpty() || description.isEmpty()) false else true
             ) {
                 if (selectedDiary != null) {
                     Text(text = "Update", fontWeight = FontWeight.Bold)
@@ -233,4 +293,25 @@ fun WriteContent(
             }
         }
     }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+@Preview(showBackground = true)
+fun WriteContentPreview() {
+    WriteContent(
+        paddingValues = PaddingValues(),
+        pagerState = rememberPagerState(),
+        title = "title",
+        onTitleChanged = {
+
+        },
+        description = "description",
+        onDescriptionChanged = {},
+        selectedDiary = null,
+        onSaveClicked = {
+
+        },
+        onUpdatedDateTime = {}
+    )
 }

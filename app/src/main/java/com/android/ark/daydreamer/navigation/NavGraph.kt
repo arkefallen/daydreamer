@@ -194,6 +194,9 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
                         errorMessage = error
                     }
                 )
+            },
+            onUpdatedDateTime = {
+                writeViewmodel.updateDateTime(it)
             }
         )
         DisplayAlertDialog(

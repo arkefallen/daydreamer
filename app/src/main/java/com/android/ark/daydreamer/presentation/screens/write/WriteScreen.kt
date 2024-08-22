@@ -11,6 +11,7 @@ import com.android.ark.daydreamer.model.Mood
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
+import java.time.ZonedDateTime
 
 @OptIn(ExperimentalPagerApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -21,7 +22,8 @@ fun WriteScreen(
     pagerState: PagerState,
     uiState: WriteUiState,
     writeViewmodel: WriteViewmodel,
-    onSaveClicked: (Diary) -> Unit
+    onSaveClicked: (Diary) -> Unit,
+    onUpdatedDateTime: (ZonedDateTime) -> Unit
 ) {
     LaunchedEffect(key1 = uiState.mood) {
         pagerState.scrollToPage(Mood.valueOf(uiState.mood.name).ordinal)
@@ -48,7 +50,8 @@ fun WriteScreen(
                 writeViewmodel.setDescription(description = desc)
             },
             selectedDiary = uiState.selectedDiary,
-            onSaveClicked = onSaveClicked
+            onSaveClicked = onSaveClicked,
+            onUpdatedDateTime = onUpdatedDateTime
         )
     }
 }
@@ -65,6 +68,7 @@ fun WriteScreenPreview() {
         writeViewmodel = viewModel(),
         onSaveClicked = {
 
-        }
+        },
+        onUpdatedDateTime = {}
     )
 }

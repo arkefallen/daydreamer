@@ -26,6 +26,7 @@ coilCompose = "2.5.0"
 accompanistPager = "0.28.0"
 desugarJdkLibs = "2.0.4"
 uiTextGoogleFonts = "1.6.8"
+sheetsComposeDialog = "1.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -69,6 +70,9 @@ coil-kotlin = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil
 github-stevdza-messagebarcompose = { group = "com.github.stevdza-san", name = "MessageBarCompose", version = "1.0.5"}
 github-stevdza-onetapcompose = { group = "com.github.stevdza-san", name = "OneTapCompose", version = "1.0.0"}
 github-vanpra-compose-datetime = { group = "io.github.vanpra.compose-material-dialogs", name = "datetime", version = "0.9.0"}
+github-maxkeppeler-sheetscomposedialog-core = { group="com.maxkeppeler.sheets-compose-dialogs", name="core", version.ref = "sheetsComposeDialog"}
+github-maxkeppeler-sheetscomposedialog-calendar = { group="com.maxkeppeler.sheets-compose-dialogs", name="calendar", version.ref = "sheetsComposeDialog"}
+github-maxkeppeler-sheetscomposedialog-clock = { group="com.maxkeppeler.sheets-compose-dialogs", name="clock", version.ref = "sheetsComposeDialog"}
 
 android-tools-desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs"}
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
@@ -76,7 +80,4 @@ androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-google-services = { id = "com.google.gms.google-services", version.ref = "googleService" }
-realm-kotlin = { id = "io.realm.kotlin", version.ref = "realm" }
-dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 

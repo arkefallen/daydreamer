@@ -3,7 +3,6 @@ package com.android.ark.daydreamer.presentation.screens.write
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -51,9 +50,6 @@ fun WriteTopBar(
             }
         },
         actions = {
-            IconButton(onClick = onBackPressed) {
-                Icon(imageVector = Icons.Rounded.DateRange, contentDescription = "Date Button")
-            }
             if (selectedDiary?.title != null) {
                 WriteMenuAction(
                     selectedDiary = selectedDiary,
