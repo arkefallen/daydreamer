@@ -105,7 +105,7 @@ fun NavGraphBuilder.authenticationRoute(
                 )
             },
             onFailedFirebaseLogin = { exception ->
-
+                messageBarState.addError(exception)
             },
             onDialogDismissed = {
                 messageBarState.addError(Exception(it))
@@ -137,7 +137,8 @@ fun NavGraphBuilder.homeRoute(
             navigateToWrite = navigateToWrite,
             drawerState = drawerState,
             onSignOutClicked = { signOutDialogOpened = true },
-            navigateToWriteWithArgs = navigateToWriteWithArgs
+            navigateToWriteWithArgs = navigateToWriteWithArgs,
+            viewmodel = viewmodel
         )
 
         DisplayAlertDialog(
@@ -177,7 +178,7 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
         val context = LocalContext.current
         var dialogOpened by remember { mutableStateOf(false) }
         var errorMessage by remember { mutableStateOf("") }
-        var galleryState = rememberGalleryState()
+        val galleryState = writeViewmodel.galleryState
 
         WriteScreen(
             onBackPressed = onBackPressed,
@@ -218,20 +219,10 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
                 writeViewmodel.updateDateTime(it)
             },
             onImageSelected = {
-                galleryState.addImage(
-                    image = GalleryImage(
-                        image = it,
-                        remoteImagePath = ""
-                    )
-                )
+                val type = context.contentResolver.getType(it)?.split("/")?.last() ?: "jpg"
+                writeViewmodel.addImage(image = it, imageType = type)
             },
             galleryState = galleryState,
-            onImageClicked = {
-
-            },
-            onAddImageClicked = {
-
-            }
         )
         DisplayAlertDialog(
             title = "Error",

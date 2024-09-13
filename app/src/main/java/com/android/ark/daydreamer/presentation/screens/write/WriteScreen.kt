@@ -26,8 +26,6 @@ fun WriteScreen(
     onSaveClicked: (Diary) -> Unit,
     onUpdatedDateTime: (ZonedDateTime) -> Unit,
     onImageSelected: (Uri) -> Unit,
-    onImageClicked: (GalleryImage) -> Unit,
-    onAddImageClicked: () -> Unit,
     galleryState: GalleryState
 ) {
     LaunchedEffect(key1 = uiState.mood) {
@@ -58,8 +56,6 @@ fun WriteScreen(
             onSaveClicked = onSaveClicked,
             onUpdatedDateTime = onUpdatedDateTime,
             onImageSelected = onImageSelected,
-            onImageClicked = onImageClicked,
-            onAddImageClicked = onAddImageClicked,
             galleryState = galleryState
         )
     }

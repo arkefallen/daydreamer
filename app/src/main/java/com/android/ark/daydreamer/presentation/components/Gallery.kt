@@ -1,6 +1,7 @@
 package com.android.ark.daydreamer.presentation.components
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,7 +44,7 @@ import kotlin.math.max
 @Composable
 fun Gallery(
     modifier: Modifier = Modifier,
-    images: List<String>,
+    images: List<Uri>,
     imageSize: Dp = 40.dp,
     spaceBetween: Dp = 10.dp,
     imageShape: CornerBasedShape = Shapes().small,
@@ -121,6 +122,7 @@ fun LastImageOverlay(
 
 @Composable
 fun ShowGalleryButton(
+    galleryLoading: Boolean,
     galleryOpened: Boolean,
     onClick: () -> Unit,
 ) {
@@ -128,7 +130,7 @@ fun ShowGalleryButton(
         onClick = onClick
     ) {
         Text(
-            text = if (galleryOpened) "Close Gallery" else "Show Gallery",
+            text = if (galleryLoading) "Loading Images" else if (galleryOpened) "Close Gallery" else "Show Gallery",
             style = TextStyle(fontSize = MaterialTheme.typography.bodySmall.fontSize)
         )
     }
@@ -142,7 +144,6 @@ fun GalleryUploader(
     imageShape: CornerBasedShape = MaterialTheme.shapes.small,
     spaceBetween: Dp = 10.dp,
     onImageSelected: (Uri) -> Unit,
-    onImageClicked: (GalleryImage) -> Unit,
     onAddImageClicked: () -> Unit,
 ) {
     val multiplePhotoPicker = rememberLauncherForActivityResult(
@@ -189,12 +190,13 @@ fun GalleryUploader(
                 }
             )
             Spacer(modifier = Modifier.width(spaceBetween))
+            Log.d("gallery uploader", "image: ${galleryState.images.toList()}")
             galleryState.images.take(numberOfVisibleImages.value).forEach { galleryImage ->
+                Log.d("gallery uploader", "image: $galleryImage")
                 AsyncImage(
                     modifier = Modifier
                         .clip(imageShape)
-                        .size(imageSize)
-                        .clickable { onImageClicked(galleryImage) },
+                        .size(imageSize),
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(galleryImage.image)
                         .crossfade(true)

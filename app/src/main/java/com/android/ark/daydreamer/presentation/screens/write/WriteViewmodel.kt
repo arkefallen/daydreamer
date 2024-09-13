@@ -1,5 +1,6 @@
 package com.android.ark.daydreamer.presentation.screens.write
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -8,10 +9,17 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.ark.daydreamer.data.repository.MongoDB
+import com.android.ark.daydreamer.domain.GetImagesFromFirebaseUseCase
 import com.android.ark.daydreamer.model.Diary
+import com.android.ark.daydreamer.model.GalleryImage
 import com.android.ark.daydreamer.model.Mood
+import com.android.ark.daydreamer.presentation.components.GalleryState
 import com.android.ark.daydreamer.utils.RequestState
 import com.android.ark.daydreamer.utils.toRealmInstant
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.storage.FirebaseStorage
 import io.realm.kotlin.types.RealmInstant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
@@ -23,7 +31,8 @@ import java.time.ZonedDateTime
 class WriteViewmodel(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-
+    val firebaseUseCase = GetImagesFromFirebaseUseCase()
+    val galleryState = GalleryState()
     var uiState by mutableStateOf(WriteUiState())
         private set
 
@@ -55,6 +64,18 @@ class WriteViewmodel(
                                     mood = Mood.valueOf(it.mood),
                                     selectedDiary = it
                                 )
+                                firebaseUseCase(
+                                    remoteImagePaths = it.images,
+                                    onSuccessFetched = { imageUri ->
+                                        galleryState.addImage(
+                                            GalleryImage(
+                                                image = imageUri,
+                                                remoteImagePath = generateImagePath(imageUri.toString())
+                                            )
+                                        )
+                                        Log.d("firebase fetch", "gallerystate: ${galleryState.images.toList()}")
+                                    }
+                                )
                             }
                         }
                         is RequestState.Error -> {
@@ -76,6 +97,7 @@ class WriteViewmodel(
             MongoDB.insertDiary(diary = diary).collect { result ->
                 when (result) {
                     is RequestState.Success -> {
+                        uploadImagesToFirebase()
                         withContext(Dispatchers.Main) {
                             onSuccess()
                         }
@@ -111,6 +133,7 @@ class WriteViewmodel(
             ).collect { result ->
                 when(result) {
                     is RequestState.Success -> {
+                        uploadImagesToFirebase()
                         withContext(Dispatchers.Main) {
                             onSuccess()
                         }
@@ -169,6 +192,32 @@ class WriteViewmodel(
                 }
             }
         }
+    }
+
+    fun addImage(image: Uri, imageType: String) {
+        val remoteImagePath = "images/${FirebaseAuth.getInstance().currentUser?.uid}/" +
+                "${image.lastPathSegment}-${System.currentTimeMillis()}.$imageType"
+        galleryState.addImage(
+            GalleryImage(
+                image = image,
+                remoteImagePath = remoteImagePath
+            )
+        )
+    }
+
+    private fun uploadImagesToFirebase() {
+        val storage = FirebaseStorage.getInstance().reference
+        galleryState.images.forEach { galleryImage ->
+            val imagePath = storage.child(galleryImage.remoteImagePath)
+            imagePath.putFile(galleryImage.image)
+        }
+    }
+
+    private fun generateImagePath(imageUri: String) : String {
+        val chunks = imageUri.split("%2F")
+        val imageName = chunks[2].split("?").first()
+        val firebaseUser = Firebase.auth.currentUser?.uid
+        return "images/$firebaseUser/$imageName"
     }
 
     fun setTitle(title: String) {

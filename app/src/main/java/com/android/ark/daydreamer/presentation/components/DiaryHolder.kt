@@ -1,5 +1,7 @@
 package com.android.ark.daydreamer.presentation.components
 
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
@@ -24,7 +26,9 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,14 +36,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.ark.daydreamer.model.Diary
 import com.android.ark.daydreamer.model.Mood
+import com.android.ark.daydreamer.presentation.screens.home.HomeViewmodel
 import com.android.ark.daydreamer.utils.Elevation
 import com.android.ark.daydreamer.utils.toInstant
 import io.realm.kotlin.ext.realmListOf
@@ -52,11 +59,41 @@ import java.util.Locale
 fun DiaryHolder(
     diary: Diary,
     onClick: (String) -> Unit,
+    viewmodel: HomeViewmodel,
 ) {
     var componentHeight by remember { mutableStateOf(0.dp) }
     val localDensity = LocalDensity.current
-    val mutableInteractionSource by  remember { mutableStateOf(MutableInteractionSource()) }
+    val localContext = LocalContext.current
+    val mutableInteractionSource by remember { mutableStateOf(MutableInteractionSource()) }
     var galleryButtonOpened by remember { mutableStateOf(false) }
+    var galleryLoading by remember { mutableStateOf(false) }
+    val downloadedImages = remember {
+        mutableStateListOf<Uri>()
+    }
+
+    LaunchedEffect(key1 = galleryButtonOpened) {
+        if (galleryButtonOpened && downloadedImages.isEmpty()) {
+            galleryLoading = true
+            viewmodel.fetchImagesFromDatabase(
+                remoteImagePaths = diary.images,
+                onSuccessFetched = {
+                    downloadedImages.add(it)
+                },
+                onFailedFetched = {
+                    Toast.makeText(
+                        localContext,
+                        "Failed to download images. Reason: ${it.message.toString()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    galleryLoading = false
+                    galleryButtonOpened = false
+                },
+                onReadyToDisplay = {
+                    galleryLoading = false
+                }
+            )
+        }
+    }
 
     Row(
         modifier = Modifier.clickable(
@@ -106,7 +143,8 @@ fun DiaryHolder(
                     ) {
                         ShowGalleryButton(
                             galleryOpened = galleryButtonOpened,
-                            onClick = { galleryButtonOpened = !galleryButtonOpened }
+                            onClick = { galleryButtonOpened = !galleryButtonOpened },
+                            galleryLoading = galleryLoading
                         )
                     }
                     AnimatedVisibility(
@@ -119,7 +157,7 @@ fun DiaryHolder(
                         )
                     ) {
                         Column(modifier = Modifier.padding(horizontal = 14.dp)) {
-                            Gallery(images = diary.images)
+                            Gallery(images = downloadedImages.toList())
                         }
                     }
                 }
@@ -169,10 +207,12 @@ fun DiaryHolderPreview() {
     DiaryHolder(
         diary = Diary().apply {
             title = "Title"
-            description = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+            description =
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
             mood = Mood.Happy.name
-            images = realmListOf("","")
+            images = realmListOf("", "")
         },
         onClick = {},
+        viewmodel = viewModel()
     )
 }

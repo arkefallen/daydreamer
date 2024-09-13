@@ -50,7 +50,8 @@ fun HomeScreen(
     onSignOutClicked: () -> Unit,
     onMenuClick: () -> Unit,
     navigateToWrite: () -> Unit,
-    navigateToWriteWithArgs: (String) -> Unit
+    navigateToWriteWithArgs: (String) -> Unit,
+    viewmodel: HomeViewmodel
 ) {
     val padding by remember { mutableStateOf(PaddingValues()) }
     // Define ScrollBehavior for nesting DateHeader at the top of the screen during scroll down
@@ -75,7 +76,8 @@ fun HomeScreen(
                     HomeContent(
                         diaryNotes = diaries.data,
                         onClick = navigateToWriteWithArgs,
-                        paddingValues = it
+                        paddingValues = it,
+                        viewmodel = viewmodel
                     )
                 }
                 is RequestState.Error -> {

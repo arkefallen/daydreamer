@@ -61,6 +61,7 @@ import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import com.maxkeppeler.sheets.clock.ClockDialog
 import com.maxkeppeler.sheets.clock.models.ClockConfig
 import com.maxkeppeler.sheets.clock.models.ClockSelection
+import io.realm.kotlin.ext.toRealmList
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
@@ -84,8 +85,6 @@ fun WriteContent(
     onUpdatedDateTime: (ZonedDateTime) -> Unit,
     galleryState: GalleryState,
     onImageSelected: (Uri) -> Unit,
-    onImageClicked: (GalleryImage) -> Unit,
-    onAddImageClicked: () -> Unit,
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -276,11 +275,7 @@ fun WriteContent(
             GalleryUploader(
                 galleryState = galleryState,
                 onImageSelected = onImageSelected,
-                onImageClicked = onImageClicked,
-                onAddImageClicked = {
-                    focusManager.clearFocus()
-                    onAddImageClicked()
-                }
+                onAddImageClicked = { focusManager.clearFocus() }
             )
             Button(
                 onClick = {
@@ -297,6 +292,7 @@ fun WriteContent(
                                 this.title = title
                                 this.description = description
                                 this.mood = Mood.entries[pagerState.currentPage].name
+                                this.images = galleryState.images.map { it.remoteImagePath }.toRealmList()
                             }
                         )
                     } else {
