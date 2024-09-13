@@ -13,6 +13,9 @@ import androidx.compose.ui.Modifier
 import com.android.ark.daydreamer.navigation.Screen
 import com.android.ark.daydreamer.utils.Constants
 import com.android.ark.daydreamer.utils.Constants.APP_ID
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthCredential
+import com.google.firebase.auth.GoogleAuthProvider
 import com.stevdzasan.messagebar.ContentWithMessageBar
 import com.stevdzasan.messagebar.MessageBarState
 import com.stevdzasan.onetap.OneTapSignInState
@@ -26,7 +29,8 @@ fun AuthenticationScreen(
     messageBarState: MessageBarState,
     loadingState: Boolean,
     onButtonClicked: () -> Unit,
-    onTokenIdReceived: (String) -> Unit,
+    onSuccessfulFirebaseLogin: (String) -> Unit,
+    onFailedFirebaseLogin: (Exception) -> Unit,
     onDialogDismissed: (String) -> Unit,
     isAuthenticated: Boolean,
     navigateToHome: () -> Unit
@@ -49,7 +53,13 @@ fun AuthenticationScreen(
         state = oneTapSignInState,
         clientId = Constants.WEB_CLIENT_ID,
         onTokenIdReceived = { tokenId ->
-            onTokenIdReceived(tokenId)
+            val credential = GoogleAuthProvider.getCredential(tokenId, null)
+            FirebaseAuth.getInstance().signInWithCredential(credential)
+                .addOnCompleteListener { result ->
+                    if (result.isSuccessful) onSuccessfulFirebaseLogin(tokenId)
+                    else result.exception?.let { onFailedFirebaseLogin(it) }
+                }
+            onSuccessfulFirebaseLogin(tokenId)
         },
         onDialogDismissed = { message ->
             onDialogDismissed(message)

@@ -1,5 +1,6 @@
 package com.android.ark.daydreamer.presentation.screens.write
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -48,7 +48,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.android.ark.daydreamer.model.Diary
+import com.android.ark.daydreamer.model.GalleryImage
 import com.android.ark.daydreamer.model.Mood
+import com.android.ark.daydreamer.presentation.components.GalleryState
+import com.android.ark.daydreamer.presentation.components.GalleryUploader
 import com.android.ark.daydreamer.utils.toInstant
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
@@ -78,7 +81,11 @@ fun WriteContent(
     onDescriptionChanged: (String) -> Unit,
     selectedDiary: Diary?,
     onSaveClicked: (Diary) -> Unit,
-    onUpdatedDateTime: (ZonedDateTime) -> Unit
+    onUpdatedDateTime: (ZonedDateTime) -> Unit,
+    galleryState: GalleryState,
+    onImageSelected: (Uri) -> Unit,
+    onImageClicked: (GalleryImage) -> Unit,
+    onAddImageClicked: () -> Unit,
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -199,7 +206,8 @@ fun WriteContent(
                 suffix = {
                     if (updatedDateTime) {
                         Icon(
-                            imageVector = Icons.Rounded.Close, contentDescription = "Date Close Button",
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = "Date Close Button",
                             modifier = Modifier.clickable(
                                 onClick = {
                                     updatedDateTime = false
@@ -210,7 +218,8 @@ fun WriteContent(
                         )
                     } else {
                         Icon(
-                            imageVector = Icons.Rounded.DateRange, contentDescription = "Date Button",
+                            imageVector = Icons.Rounded.DateRange,
+                            contentDescription = "Date Button",
                             modifier = Modifier.clickable(onClick = { calendarState.show() })
                         )
                     }
@@ -264,10 +273,25 @@ fun WriteContent(
                 .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(20.dp))
+            GalleryUploader(
+                galleryState = galleryState,
+                onImageSelected = onImageSelected,
+                onImageClicked = onImageClicked,
+                onAddImageClicked = {
+                    focusManager.clearFocus()
+                    onAddImageClicked()
+                }
+            )
             Button(
                 onClick = {
                     if (title.isNotEmpty() && description.isNotEmpty()) {
-                        onUpdatedDateTime(ZonedDateTime.of(currentDate, currentTime, ZoneId.systemDefault()))
+                        onUpdatedDateTime(
+                            ZonedDateTime.of(
+                                currentDate,
+                                currentTime,
+                                ZoneId.systemDefault()
+                            )
+                        )
                         onSaveClicked(
                             Diary().apply {
                                 this.title = title
@@ -283,7 +307,7 @@ fun WriteContent(
                     .fillMaxWidth()
                     .height(50.dp),
                 shape = MaterialTheme.shapes.small,
-                enabled = if (title.isEmpty() || description.isEmpty()) false else true
+                enabled = !(title.isEmpty() || description.isEmpty())
             ) {
                 if (selectedDiary != null) {
                     Text(text = "Update", fontWeight = FontWeight.Bold)
@@ -299,19 +323,19 @@ fun WriteContent(
 @Composable
 @Preview(showBackground = true)
 fun WriteContentPreview() {
-    WriteContent(
-        paddingValues = PaddingValues(),
-        pagerState = rememberPagerState(pageCount = {1}),
-        title = "title",
-        onTitleChanged = {
-
-        },
-        description = "description",
-        onDescriptionChanged = {},
-        selectedDiary = null,
-        onSaveClicked = {
-
-        },
-        onUpdatedDateTime = {}
-    )
+//    WriteContent(
+//        paddingValues = PaddingValues(),
+//        pagerState = rememberPagerState(pageCount = { 1 }),
+//        title = "title",
+//        onTitleChanged = {
+//
+//        },
+//        description = "description",
+//        onDescriptionChanged = {},
+//        selectedDiary = null,
+//        onSaveClicked = {
+//
+//        },
+//        onUpdatedDateTime = {}
+//    )
 }

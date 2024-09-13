@@ -12,6 +12,7 @@ import com.android.ark.daydreamer.navigation.Screen
 import com.android.ark.daydreamer.navigation.SetupNavigationGraph
 import com.android.ark.daydreamer.ui.theme.DaydreamerAppTheme
 import com.android.ark.daydreamer.utils.Constants.APP_ID
+import com.google.firebase.FirebaseApp
 import io.realm.kotlin.mongodb.App
 
 @ExperimentalMaterial3Api
@@ -20,6 +21,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        FirebaseApp.initializeApp(this)
         setContent {
             DaydreamerAppTheme {
                 val navController = rememberNavController()

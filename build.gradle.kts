@@ -8,11 +8,12 @@ plugins {
     id("com.google.devtools.ksp") version "1.9.10-1.0.13" apply false
 }
 
-//buildscript {
-//    repositories {
-//        mavenCentral()
-//    }
-//    dependencies {
-//        classpath("com.google.dagger:hilt-android-gradle-plugin:2.52")
-//    }
-//}
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.google.dagger:hilt-android-gradle-plugin:2.52")
+        classpath(libs.google.gms.services)
+    }
+}

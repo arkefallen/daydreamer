@@ -21,8 +21,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.android.ark.daydreamer.model.GalleryImage
 import com.android.ark.daydreamer.model.Mood
 import com.android.ark.daydreamer.presentation.components.DisplayAlertDialog
+import com.android.ark.daydreamer.presentation.components.rememberGalleryState
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationScreen
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationViewmodel
 import com.android.ark.daydreamer.presentation.screens.home.HomeScreen
@@ -89,7 +91,7 @@ fun NavGraphBuilder.authenticationRoute(
                 authenticationViewmodel.setLoading(true)
             },
             messageBarState = messageBarState,
-            onTokenIdReceived = { tokenId ->
+            onSuccessfulFirebaseLogin = { tokenId ->
                 authenticationViewmodel.signInToMongoAtlas(
                     tokenId = tokenId,
                     onSuccess = {
@@ -101,6 +103,9 @@ fun NavGraphBuilder.authenticationRoute(
                         authenticationViewmodel.setLoading(false)
                     }
                 )
+            },
+            onFailedFirebaseLogin = { exception ->
+
             },
             onDialogDismissed = {
                 messageBarState.addError(Exception(it))
@@ -172,6 +177,7 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
         val context = LocalContext.current
         var dialogOpened by remember { mutableStateOf(false) }
         var errorMessage by remember { mutableStateOf("") }
+        var galleryState = rememberGalleryState()
 
         WriteScreen(
             onBackPressed = onBackPressed,
@@ -210,6 +216,21 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
             },
             onUpdatedDateTime = {
                 writeViewmodel.updateDateTime(it)
+            },
+            onImageSelected = {
+                galleryState.addImage(
+                    image = GalleryImage(
+                        image = it,
+                        remoteImagePath = ""
+                    )
+                )
+            },
+            galleryState = galleryState,
+            onImageClicked = {
+
+            },
+            onAddImageClicked = {
+
             }
         )
         DisplayAlertDialog(
