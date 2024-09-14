@@ -184,6 +184,9 @@ class WriteViewmodel @Inject constructor(
                 ).collect { result ->
                     when(result) {
                         is RequestState.Success -> {
+                            uiState.selectedDiary?.let {
+                                removeImagesInFirebase(it.images.toList())
+                            }
                             withContext(Dispatchers.Main) {
                                 onSuccess()
                             }
@@ -234,6 +237,13 @@ class WriteViewmodel @Inject constructor(
                         }
                     }
                 }
+        }
+    }
+
+    private fun removeImagesInFirebase(images: List<String>) {
+        val storage = FirebaseStorage.getInstance().reference
+        images.forEach { path ->
+            storage.child(path).delete()
         }
     }
 

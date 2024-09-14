@@ -188,7 +188,6 @@ fun WriteContent(
         }
         Column(
             modifier = Modifier
-                .weight(1f)
                 .padding(bottom = 24.dp)
                 .padding(horizontal = 24.dp)
         ) {
@@ -317,6 +316,7 @@ fun WriteContent(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 @Preview(showBackground = true)
 fun WriteContentPreview() {
