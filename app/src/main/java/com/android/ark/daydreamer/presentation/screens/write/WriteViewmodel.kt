@@ -8,7 +8,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.ark.daydreamer.data.database.ImagesToDeleteDAO
 import com.android.ark.daydreamer.data.database.dao.ImagesToUploadDAO
+import com.android.ark.daydreamer.data.database.entity.ImageToDelete
 import com.android.ark.daydreamer.data.database.entity.ImageToUpload
 import com.android.ark.daydreamer.data.repository.MongoDB
 import com.android.ark.daydreamer.domain.GetImagesFromFirebaseUseCase
@@ -35,7 +37,8 @@ import javax.inject.Inject
 @HiltViewModel
 class WriteViewmodel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val imagesToUploadDAO: ImagesToUploadDAO
+    private val imagesToUploadDAO: ImagesToUploadDAO,
+    private val imagesToDeleteDAO: ImagesToDeleteDAO
 ) : ViewModel() {
     val firebaseUseCase = GetImagesFromFirebaseUseCase()
     val galleryState = GalleryState()
@@ -167,6 +170,10 @@ class WriteViewmodel @Inject constructor(
                     onSuccess = onSuccess,
                     onError = onError
                 )
+                if (galleryState.imagesToBeDeleted.isNotEmpty()) {
+                    removeImagesInFirebase(diary.images.toList())
+                    galleryState.clearImagesToBeDeleted()
+                }
             } else {
                 insertDiary(diary, onSuccess, onError)
             }
@@ -180,7 +187,7 @@ class WriteViewmodel @Inject constructor(
         viewModelScope.launch {
             if (uiState.selectedDiaryId != null) {
                 MongoDB.deleteDiary(
-                    id = ObjectId.invoke(uiState.selectedDiaryId!!)
+                    diaryId = ObjectId.invoke(uiState.selectedDiaryId!!)
                 ).collect { result ->
                     when(result) {
                         is RequestState.Success -> {
@@ -244,6 +251,15 @@ class WriteViewmodel @Inject constructor(
         val storage = FirebaseStorage.getInstance().reference
         images.forEach { path ->
             storage.child(path).delete()
+                .addOnFailureListener {
+                    viewModelScope.launch(Dispatchers.IO) {
+                        imagesToDeleteDAO.storeImageToDelete(
+                            imageToDelete = ImageToDelete(
+                                remoteImagePath = path
+                            )
+                        )
+                    }
+                }
         }
     }
 

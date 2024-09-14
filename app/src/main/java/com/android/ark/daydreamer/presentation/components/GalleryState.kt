@@ -5,9 +5,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import com.android.ark.daydreamer.model.GalleryImage
 
-@Composable
-fun rememberGalleryState() : GalleryState = remember { GalleryState() }
-
 class GalleryState {
     val images = mutableStateListOf<GalleryImage>()
     val imagesToBeDeleted = mutableStateListOf<GalleryImage>()

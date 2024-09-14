@@ -142,11 +142,11 @@ object MongoDB : MongoRepository {
         }
     }
 
-    override suspend fun deleteDiary(id: ObjectId): Flow<RequestState<Boolean>> {
+    override suspend fun deleteDiary(diaryId: ObjectId): Flow<RequestState<Boolean>> {
         return if (user != null) {
             try {
                 realm.write {
-                    val removedDiary = query<Diary>(query = "_id == $0 AND ownerId == $1", id, user.id)
+                    val removedDiary = query<Diary>(query = "_id == $0 AND ownerId == $1", diaryId, user.id)
                         .first()
                         .find()
                     if (removedDiary != null) {
@@ -178,6 +178,27 @@ object MongoDB : MongoRepository {
             }
         }
     }
+
+    override suspend fun deleteAllDiaries(): Flow<RequestState<Boolean>> =
+        if (user != null) {
+            realm.write {
+                val diaries = this.query<Diary>("ownerId == $0", user.id).find()
+                try {
+                    delete(diaries)
+                    flow {
+                        emit(RequestState.Success(data = true))
+                    }
+                } catch (e: Exception) {
+                    flow {
+                        emit(RequestState.Error(e.message.toString()))
+                    }
+                }
+            }
+        } else {
+            flow {
+                emit(RequestState.Error(UserNotAuthenticatedMongoDBException().toString()))
+            }
+        }
 }
 
 private class UserNotAuthenticatedMongoDBException : Exception("User is not logged in")

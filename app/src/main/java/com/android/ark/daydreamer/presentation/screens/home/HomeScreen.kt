@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
@@ -51,12 +52,17 @@ fun HomeScreen(
     onMenuClick: () -> Unit,
     navigateToWrite: () -> Unit,
     navigateToWriteWithArgs: (String) -> Unit,
-    viewmodel: HomeViewmodel
+    viewmodel: HomeViewmodel,
+    onDeleteAllDiaries: () -> Unit
 ) {
     val padding by remember { mutableStateOf(PaddingValues()) }
     // Define ScrollBehavior for nesting DateHeader at the top of the screen during scroll down
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    NavigationDrawer(drawerState = drawerState, onSignOutClicked = onSignOutClicked) {
+    NavigationDrawer(
+        drawerState = drawerState,
+        onSignOutClicked = onSignOutClicked,
+        onDeleteAllDiaries = onDeleteAllDiaries
+    ) {
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
@@ -109,6 +115,7 @@ fun HomeScreen(
 fun NavigationDrawer(
     drawerState: DrawerState,
     onSignOutClicked: () -> Unit,
+    onDeleteAllDiaries: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     ModalNavigationDrawer(
@@ -127,6 +134,23 @@ fun NavigationDrawer(
                         modifier = Modifier.size(250.dp)
                     )
                 }
+                NavigationDrawerItem(
+                    label = {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Delete,
+                                contentDescription = "Delete All Diaries",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(text = "Delete All Diaries", color = MaterialTheme.colorScheme.onSurface)
+                        }
+                    },
+                    selected = false,
+                    onClick = onDeleteAllDiaries
+                )
                 NavigationDrawerItem(
                     label = {
                         Row(

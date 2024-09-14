@@ -55,7 +55,8 @@ fun WriteScreen(
     onSaveClicked: (Diary) -> Unit,
     onUpdatedDateTime: (ZonedDateTime) -> Unit,
     onImageSelected: (Uri) -> Unit,
-    galleryState: GalleryState
+    galleryState: GalleryState,
+    onImageRemoved: (GalleryImage) -> Unit
 ) {
     var selectedGalleryImage by remember {
         mutableStateOf<GalleryImage?>(null)
@@ -100,7 +101,7 @@ fun WriteScreen(
                     ZoomableImage(
                         selectedGalleryImage = image,
                         onCloseClicked = { selectedGalleryImage = null },
-                        onDeleteClicked = {}
+                        onDeleteClicked = onImageRemoved
                     )
                 }
             }
@@ -113,7 +114,7 @@ fun WriteScreen(
 fun ZoomableImage(
     selectedGalleryImage: GalleryImage,
     onCloseClicked: () -> Unit,
-    onDeleteClicked: () -> Unit
+    onDeleteClicked: (GalleryImage) -> Unit
 ) {
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }
@@ -160,7 +161,10 @@ fun ZoomableImage(
                 Icon(imageVector = Icons.Rounded.Close, contentDescription = "Close Icon")
                 Text(text = "Close")
             }
-            Button(onClick = onDeleteClicked) {
+            Button(onClick = {
+                onDeleteClicked(selectedGalleryImage)
+                onCloseClicked()
+            }) {
                 Icon(imageVector = Icons.Rounded.Delete, contentDescription = "Delete Icon")
                 Text(text = "Delete")
             }

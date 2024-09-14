@@ -82,7 +82,7 @@ fun DiaryHolder(
                 onFailedFetched = {
                     Toast.makeText(
                         localContext,
-                        "Failed to download images. Reason: ${it.message.toString()}",
+                        "Failed to download images. Try to re-download",
                         Toast.LENGTH_SHORT
                     ).show()
                     galleryLoading = false

@@ -3,6 +3,7 @@ package com.android.ark.daydreamer.di
 import android.content.Context
 import androidx.room.Room
 import com.android.ark.daydreamer.data.database.ImageDatabase
+import com.android.ark.daydreamer.data.database.MIGRATION_1_2
 import com.android.ark.daydreamer.utils.Constants
 import dagger.Module
 import dagger.Provides
@@ -23,11 +24,17 @@ object DatabaseModule {
             context = context,
             klass = ImageDatabase::class.java,
             name = Constants.DATABASE_NAME
-        ).build()
+        )
+            .addMigrations(MIGRATION_1_2)
+            .build()
     }
 
     @Provides
     @Singleton
     fun provideFirstDao(database: ImageDatabase) = database.imageToUploadDao()
+
+    @Provides
+    @Singleton
+    fun provideSecondDao(database: ImageDatabase) = database.imageToDeleteDao()
 
 }

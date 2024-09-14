@@ -8,7 +8,9 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
+import com.android.ark.daydreamer.data.database.ImagesToDeleteDAO
 import com.android.ark.daydreamer.data.database.dao.ImagesToUploadDAO
+import com.android.ark.daydreamer.domain.RetryRemovingImageFromFirebaseUseCase
 import com.android.ark.daydreamer.domain.RetryUploadingImageToFirebaseUseCase
 import com.android.ark.daydreamer.navigation.Screen
 import com.android.ark.daydreamer.navigation.SetupNavigationGraph
@@ -29,6 +31,8 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var imagesToUploadDAO: ImagesToUploadDAO
+    @Inject
+    lateinit var imagesToDeleteDAO: ImagesToDeleteDAO
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,10 +49,13 @@ class MainActivity : ComponentActivity() {
             }
         }
         val sessionUploadUseCase = RetryUploadingImageToFirebaseUseCase()
+        val sessionRemoveUseCase = RetryRemovingImageFromFirebaseUseCase()
         cleanupCheck(
             scope = lifecycleScope,
             imagesToUploadDAO = imagesToUploadDAO,
-            retryUploadingImageToFirebaseUseCase = sessionUploadUseCase
+            retryUploadingImageToFirebaseUseCase = sessionUploadUseCase,
+            imagesToDeleteDAO = imagesToDeleteDAO,
+            retryRemovingImageFromFirebaseUseCase = sessionRemoveUseCase
         )
     }
 
@@ -61,16 +68,29 @@ class MainActivity : ComponentActivity() {
     private fun cleanupCheck(
         scope: CoroutineScope,
         imagesToUploadDAO: ImagesToUploadDAO,
-        retryUploadingImageToFirebaseUseCase: RetryUploadingImageToFirebaseUseCase
+        retryUploadingImageToFirebaseUseCase: RetryUploadingImageToFirebaseUseCase,
+        imagesToDeleteDAO: ImagesToDeleteDAO,
+        retryRemovingImageFromFirebaseUseCase: RetryRemovingImageFromFirebaseUseCase
     ) {
         scope.launch(Dispatchers.IO) {
-            val result = imagesToUploadDAO.getAllImages()
-            result.forEach { imageToUpload ->
+            val allImagesToUpload = imagesToUploadDAO.getAllImages()
+            allImagesToUpload.forEach { imageToUpload ->
                 retryUploadingImageToFirebaseUseCase(
                     imageToUpload = imageToUpload,
                     onSuccess = {
                         scope.launch(Dispatchers.IO) {
                             imagesToUploadDAO.cleanupImage(imageToUpload.id)
+                        }
+                    }
+                )
+            }
+            val allImagesToDelete = imagesToDeleteDAO.getAllImages()
+            allImagesToDelete.forEach { imageToDelete ->
+                retryRemovingImageFromFirebaseUseCase(
+                    imageToDelete = imageToDelete,
+                    onSuccess = {
+                        scope.launch(Dispatchers.IO) {
+                            imagesToDeleteDAO.removeImageToDelete(imageToDelete.id)
                         }
                     }
                 )
