@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -21,10 +22,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.android.ark.daydreamer.model.GalleryImage
 import com.android.ark.daydreamer.model.Mood
 import com.android.ark.daydreamer.presentation.components.DisplayAlertDialog
-import com.android.ark.daydreamer.presentation.components.rememberGalleryState
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationScreen
 import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationViewmodel
 import com.android.ark.daydreamer.presentation.screens.home.HomeScreen
@@ -172,7 +171,7 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
             defaultValue = null
         })
     ) {
-        val writeViewmodel: WriteViewmodel = viewModel()
+        val writeViewmodel: WriteViewmodel = hiltViewModel()
         val uiState = writeViewmodel.uiState
         val pagerState = rememberPagerState(pageCount = { Mood.entries.size })
         val context = LocalContext.current

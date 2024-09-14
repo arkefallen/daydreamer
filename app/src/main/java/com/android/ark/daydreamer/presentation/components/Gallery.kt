@@ -1,7 +1,6 @@
 package com.android.ark.daydreamer.presentation.components
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -145,6 +144,7 @@ fun GalleryUploader(
     spaceBetween: Dp = 10.dp,
     onImageSelected: (Uri) -> Unit,
     onAddImageClicked: () -> Unit,
+    onImageClicked: (GalleryImage) -> Unit,
 ) {
     val multiplePhotoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 8)
@@ -190,13 +190,13 @@ fun GalleryUploader(
                 }
             )
             Spacer(modifier = Modifier.width(spaceBetween))
-            Log.d("gallery uploader", "image: ${galleryState.images.toList()}")
             galleryState.images.take(numberOfVisibleImages.value).forEach { galleryImage ->
-                Log.d("gallery uploader", "image: $galleryImage")
                 AsyncImage(
                     modifier = Modifier
                         .clip(imageShape)
-                        .size(imageSize),
+                        .size(imageSize)
+                        .clickable { onImageClicked(galleryImage) }
+                    ,
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(galleryImage.image)
                         .crossfade(true)

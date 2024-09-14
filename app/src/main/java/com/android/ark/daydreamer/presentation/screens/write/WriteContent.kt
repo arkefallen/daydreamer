@@ -85,6 +85,7 @@ fun WriteContent(
     onUpdatedDateTime: (ZonedDateTime) -> Unit,
     galleryState: GalleryState,
     onImageSelected: (Uri) -> Unit,
+    onImageClicked: (GalleryImage) -> Unit
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -275,7 +276,8 @@ fun WriteContent(
             GalleryUploader(
                 galleryState = galleryState,
                 onImageSelected = onImageSelected,
-                onAddImageClicked = { focusManager.clearFocus() }
+                onAddImageClicked = { focusManager.clearFocus() },
+                onImageClicked = { onImageClicked(it) }
             )
             Button(
                 onClick = {
@@ -315,7 +317,6 @@ fun WriteContent(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 @Preview(showBackground = true)
 fun WriteContentPreview() {

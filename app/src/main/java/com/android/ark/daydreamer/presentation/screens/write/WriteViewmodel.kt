@@ -8,6 +8,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.ark.daydreamer.data.database.dao.ImagesToUploadDAO
+import com.android.ark.daydreamer.data.database.entity.ImageToUpload
 import com.android.ark.daydreamer.data.repository.MongoDB
 import com.android.ark.daydreamer.domain.GetImagesFromFirebaseUseCase
 import com.android.ark.daydreamer.model.Diary
@@ -20,6 +22,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.storage.FirebaseStorage
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.types.RealmInstant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
@@ -27,9 +30,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
 import java.time.ZonedDateTime
+import javax.inject.Inject
 
-class WriteViewmodel(
-    private val savedStateHandle: SavedStateHandle
+@HiltViewModel
+class WriteViewmodel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
+    private val imagesToUploadDAO: ImagesToUploadDAO
 ) : ViewModel() {
     val firebaseUseCase = GetImagesFromFirebaseUseCase()
     val galleryState = GalleryState()
@@ -210,6 +216,24 @@ class WriteViewmodel(
         galleryState.images.forEach { galleryImage ->
             val imagePath = storage.child(galleryImage.remoteImagePath)
             imagePath.putFile(galleryImage.image)
+                // Check the progress of image uploading
+                .addOnProgressListener { taskSnapshot ->
+                    // Take the upload task session
+                    val sessionUri = taskSnapshot.uploadSessionUri
+                    // If the uploading process is failed or interrupted,then retry
+                    // the uploading process by resuming the upload session to Firebase
+                    if (sessionUri != null) {
+                        viewModelScope.launch(Dispatchers.IO) {
+                            imagesToUploadDAO.addImageToUpload(
+                                ImageToUpload(
+                                    remoteImagePath = galleryImage.remoteImagePath,
+                                    imageUri = galleryImage.image.toString(),
+                                    sessionUri = sessionUri.toString()
+                                )
+                            )
+                        }
+                    }
+                }
         }
     }
 
