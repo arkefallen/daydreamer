@@ -10,12 +10,12 @@ plugins {
 
 android {
     namespace = "com.android.ark.daydreamer"
-    compileSdk = 34
+    compileSdk = ProjectConfig.COMPILE_SDK_VERSION
 
     defaultConfig {
         applicationId = "com.android.ark.daydreamer"
-        minSdk = 26
-        targetSdk = 34
+        minSdk = ProjectConfig.MINIMUM_SDK_VERSION
+        targetSdk = ProjectConfig.TARGET_SDK_VERSION
         versionCode = 1
         versionName = "1.0"
 
@@ -53,7 +53,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
+        kotlinCompilerExtensionVersion = ProjectConfig.KOTLIN_COMPILER_EXTENSION_VERSION
     }
     packaging {
         resources {
@@ -99,11 +99,7 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     // Mongo DB - Realm
-    implementation(libs.jetbrains.kotlinx.coroutines.core) {
-        version {
-            strictly("1.6.0-native-mt")
-        }
-    }
+    implementation(libs.jetbrains.kotlinx.coroutines.core)
     implementation(libs.realm.kotlin.library.sync)
 
     implementation(libs.coil.kotlin)
@@ -113,6 +109,18 @@ dependencies {
     implementation(libs.github.maxkeppeler.sheetscomposedialog.core)
     implementation(libs.github.maxkeppeler.sheetscomposedialog.calendar)
     implementation(libs.github.maxkeppeler.sheetscomposedialog.clock)
+
+    implementation(project(":data:model"))
+    implementation(project(":data:room"))
+
+    implementation(project(":core:ui"))
+    implementation(project(":core:util"))
+
+    implementation(project(":feature:home"))
+    implementation(project(":feature:write"))
+    implementation(project(":feature:auth"))
+
+    implementation(project(":domain"))
 
     // Disabling Annotation API 26 Level or Higher
     coreLibraryDesugaring(libs.android.tools.desugar)

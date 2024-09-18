@@ -33,15 +33,15 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.android.ark.daydreamer.model.Mood
-import com.android.ark.daydreamer.presentation.components.DisplayAlertDialog
-import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationScreen
-import com.android.ark.daydreamer.presentation.screens.auth.AuthenticationViewmodel
-import com.android.ark.daydreamer.presentation.screens.home.HomeScreen
-import com.android.ark.daydreamer.presentation.screens.home.HomeViewmodel
-import com.android.ark.daydreamer.presentation.screens.write.WriteScreen
-import com.android.ark.daydreamer.presentation.screens.write.WriteViewmodel
-import com.android.ark.daydreamer.utils.Constants
+import com.android.ark.auth.AuthenticationScreen
+import com.android.ark.auth.AuthenticationViewmodel
+import com.android.ark.home.HomeScreen
+import com.android.ark.home.HomeViewmodel
+import com.android.ark.model.Mood
+import com.android.ark.ui.components.DisplayAlertDialog
+import com.android.ark.util.Constants
+import com.android.ark.write.WriteScreen
+import com.android.ark.write.WriteViewmodel
 import com.stevdzasan.messagebar.rememberMessageBarState
 import com.stevdzasan.onetap.rememberOneTapSignInState
 import io.realm.kotlin.mongodb.App
@@ -133,7 +133,7 @@ fun NavGraphBuilder.homeRoute(
 ) {
     composable(route = Screen.Home.route) {
         val viewmodel: HomeViewmodel = hiltViewModel()
-        val diaries by viewmodel.diaries
+        val diaries by viewmodel.diaries.collectAsStateWithLifecycle()
         val deleteLoadingState by viewmodel.requestLoading.collectAsStateWithLifecycle()
 
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)

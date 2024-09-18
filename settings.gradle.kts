@@ -25,4 +25,13 @@ dependencyResolutionManagement {
 
 rootProject.name = "DaydreamerApp"
 include(":app")
- 
+include(":core:ui")
+include(":core:util")
+include(":data:mongo")
+include(":data:room")
+include(":feature:auth")
+include(":feature:home")
+include(":domain")
+include(":feature:write")
+include(":data:model")
+include(":data:glitch")

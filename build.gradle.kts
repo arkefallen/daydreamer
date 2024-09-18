@@ -6,6 +6,7 @@ plugins {
 //    alias(libs.plugins.google.services) apply false
     id("io.realm.kotlin") version "1.16.0" apply false
     id("com.google.devtools.ksp") version "1.9.10-1.0.13" apply false
+    alias(libs.plugins.android.library) apply false
 }
 
 buildscript {

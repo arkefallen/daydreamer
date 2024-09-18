@@ -18,7 +18,7 @@ googleService = "4.4.2"
 firebaseAuth = "23.0.0"
 firebaseStorage = "21.0.0"
 room = "2.6.1"
-kotlinxCoroutinesCore = "1.6.0-native-mt"
+kotlinxCoroutinesCore = "1.7.0"
 realmLibrarySync = "1.16.0"
 hiltNavigationCompose = "1.2.0"
 googlePlayServicesAuth = "21.2.0"
@@ -27,6 +27,8 @@ accompanistPager = "0.28.0"
 desugarJdkLibs = "2.0.4"
 uiTextGoogleFonts = "1.6.8"
 sheetsComposeDialog = "1.3.0"
+appcompat = "1.7.0"
+material = "1.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -77,8 +79,11 @@ github-maxkeppeler-sheetscomposedialog-clock = { group="com.maxkeppeler.sheets-c
 
 android-tools-desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs"}
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }
 

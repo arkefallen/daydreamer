@@ -1,7 +1,7 @@
 package com.android.ark.daydreamer.di
 
 import android.content.Context
-import com.android.ark.daydreamer.utils.NetworkConnectivityObserver
+import com.android.ark.util.NetworkConnectivityObserver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -2,9 +2,9 @@ package com.android.ark.daydreamer.di
 
 import android.content.Context
 import androidx.room.Room
-import com.android.ark.daydreamer.data.database.ImageDatabase
-import com.android.ark.daydreamer.data.database.MIGRATION_1_2
-import com.android.ark.daydreamer.utils.Constants
+import com.android.ark.room.ImageDatabase
+import com.android.ark.room.MIGRATION_1_2
+import com.android.ark.util.Constants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
